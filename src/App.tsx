@@ -544,6 +544,8 @@ const App = () => {
             {/* Toast notifications globally disabled */}
             <BrowserRouter>
               <PromoBannerProvider>
+                <ConfirmProvider>
+
                 <PwaSplash />
                 <ScrollToTop />
                 <InternalLinkInterceptor />
@@ -1015,7 +1017,9 @@ const App = () => {
                     </DeferredRoutes>
                   </RouteErrorBoundary>
                 </Suspense>
+                </ConfirmProvider>
               </PromoBannerProvider>
+
             </BrowserRouter>
             <Analytics />
             <SpeedInsights />
