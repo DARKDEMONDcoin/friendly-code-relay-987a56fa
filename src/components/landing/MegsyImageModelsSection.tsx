@@ -31,7 +31,7 @@ const MegsyImageModelsSection = () => {
   const settings = SETTINGS_LABELS[locale.code] ?? SETTINGS_LABELS.en;
 
   return (
-    <section id="anchor-image-models-section" className="relative overflow-hidden py-20 md:py-36">
+    <section id="anchor-image-models-section" className="relative scroll-mt-28 overflow-hidden py-20 md:py-28">
       <div className="absolute right-1/3 top-1/3 -z-10 h-[600px] w-[600px] rounded-full bg-pink-500/10 blur-[160px]" />
 
       <div className="mx-auto max-w-7xl px-6">
