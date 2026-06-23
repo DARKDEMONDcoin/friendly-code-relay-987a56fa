@@ -1,69 +1,117 @@
-# خطة إصلاح الاستجابة عبر الصفحات
+# خطة حماية التطبيق من تصرفات المستخدمين
 
-## ما اكتشفته من الفحص الفعلي
+## النطاق
 
-فحصت الصفحات على 4 مقاسات (375×667 / 414×896 / 820×1024 / 1280×800) وحقنت جلسة تسجيل الدخول لفحص /chat و /settings. النتائج:
+4 أنواع حماية × 3 أولويات صفحات (Billing/Settings, Auth, Chat). شغل وقائي بدون تغيير منطق الأعمال.
 
-- **لا يوجد horizontal overflow** على أي صفحة ✅
-- **Vertical overflow على /chat على iPhone SE**: المحتوى 720px لكن الشاشة 667px → الـcomposer أو الـheader مقطوع 53px
-- **Vertical overflow على /auth على iPhone SE**: 731 > 667 → زر "Continue" تحت الـfold
-- **Vertical overflow على /chat tablet**: 1061 > 1024 → 37px مقطوع
-- **عناصر زخرفية (blur blobs) تتجاوز العرض** لكن داخل `overflow-hidden` فلا تسبب scroll حقيقي
-- **بانر العرض الجديد يضيف ~45px** قد يكون السبب الأساسي في chat overflow
+## الإصلاحات
 
-## الإصلاحات المقترحة
+### 1. Input Validation (zod schemas + تكامل في الفورمز)
 
-### 1. صفحة الشات (Chat) — الأولوية الأولى
+ملف جديد `src/lib/validation/schemas.ts` يحتوي:
 
-- التأكد من أن `--promo-banner-h` يُطرح من ارتفاع shell الشات بشكل صحيح، وأن الـcomposer دائماً مرئي.
-- استخدام `100dvh` (مع fallback للـ`100vh`) ووضع الـcomposer كـ`sticky bottom-0` على الموبايل لضمان وصوله بدون scroll.
-- تقليل padding الـheader والـcomposer على الشاشات تحت 400px.
-- إخفاء البانر تلقائياً عند الـscroll لأسفل على الموبايل (auto-hide) لتوفير مساحة.
+- `emailSchema` — trim + email + max 254
+- `passwordSchema` — min 8, max 128, يحوي حرف ورقم
+- `displayNameSchema` — trim, 1-50, بدون HTML tags
+- `chatMessageSchema` — trim, 1-8000 chars
+- `attachmentSchema` — max 25MB، أنواع mime مسموح بها فقط
+- `referralCodeSchema` — alphanumeric, 3-20
 
-### 2. صفحة التسجيل (Auth) — الأولوية الثانية
+**تطبيق:**
+- `AuthPage.tsx` — استخدام schemas قبل `handleCheckEmail`, `handleSubmitPassword`, تظهر error inline
+- composer الشات — التحقق قبل send، رفض الرسائل الفاضية أو > 8000 char، رفض المرفقات الكبيرة بـtoast واضح
+- صفحات الإعدادات (Profile, ChangeEmail, ChangePassword) — نفس الـschemas
 
-- مراجعة `AuthPage.tsx` لضمان أن الفورم بالكامل (Email + Continue + Social) يدخل في 600px ارتفاع.
-- تقليل padding عمودي و font sizes على mobile.
-- استخدام `min-h-[100dvh]` بدل `min-h-screen` لتجنب مشاكل URL bar.
-- جعل الصفحة قابلة للـscroll بطبيعية إذا فعلاً المحتوى أطول (بدل قص أو fixed).
+### 2. Confirmations على الـDestructive Actions
 
-### 3. صفحات الإعدادات (Settings) والأسعار (Pricing)
+ملف جديد `src/components/common/ConfirmDialog.tsx` (يستخدم `AlertDialog` من shadcn) + hook `useConfirm()` يرجع promise.
 
-- صفحات طويلة بطبيعتها → الـscroll مقبول. الإصلاحات هنا:
-  - تثبيت header الإعدادات على الموبايل ليبقى زر "Back" متاح
-  - تقليل حجم الكروت على tablet
-  - إصلاح blur blobs الزخرفية لتكون داخل `overflow-hidden` parent دائماً
+**تطبيق:**
+- حذف محادثة (chat sidebar) — "Delete this conversation? This cannot be undone"
+- حذف رسالة
+- Sign out من كل الأجهزة
+- Cancel subscription
+- Delete account (موجود غالباً — نتأكد)
+- Clear chat history / memory
+- Remove workspace member
+- إلغاء job قيد التشغيل (research/video)
 
-### 4. إصلاحات عامة (shared)
+كل dialog يطلب الضغط مرتين، والـconfirm button احمر فيه نص يكتبه المستخدم للحذف الخطير (account, workspace).
 
-- إضافة `overflow-x-hidden` على `body` كحماية من أي عنصر زخرفي
-- توحيد استخدام `100dvh` بدل `100vh` في كل الـshells (auth, chat, settings)
-- مراجعة `tailwind.config` للتأكد من breakpoint `xs` (إن وُجد) أو إضافته للموبايلات الصغيرة (≤375px)
+### 3. Rate Limiting / Spam Guards (client-side)
 
-## الترتيب التنفيذي
+ملف جديد `src/lib/guards/rateLimiter.ts`:
 
-1. **Chat shell** — أهم إصلاح (composer reachability)
-2. **Auth page** — يؤثر على التحويل
-3. **Settings header sticky** — quality of life
-4. **Pricing decorative blobs** — تنظيف بصري
+```ts
+- useDebouncedAction(fn, ms)  // للأزرار اللي ممكن تتدبل-كليك
+- useRateLimit(key, max, windowMs)  // sliding window في memory
+- inflightGuard(key)  // منع نفس الـrequest مرتين بالتوازي
+```
 
-## التفاصيل التقنية (للمراجعة)
+**تطبيق:**
+- Send button في الشات — debounce 250ms + منع send لو في رسالة قيد الإرسال (موجود غالباً — نتأكد)
+- Auth submit (login/signup) — منع double-submit + cooldown 1s
+- "Resend OTP/email verification" — cooldown 30s مع countdown مرئي
+- "Forgot password" — cooldown 60s
+- Create new chat — debounce 500ms
+- Like/feedback buttons — debounce
+- Pricing checkout buttons — منع double-click (ممكن يخلق checkout مرتين)
+- Save settings — منع spam save
+
+### 4. Error Recovery & Retries
+
+ملف جديد `src/lib/guards/retry.ts`:
+
+```ts
+- withRetry(fn, {retries, baseMs, shouldRetry})  // exponential backoff
+- isTransientError(err)  // network/5xx/timeout
+```
+
+ملف جديد `src/components/common/NetworkStatus.tsx` — toast لما النت يقطع/يرجع (موجود OfflineBanner — نوسعه).
+
+**تطبيق:**
+- Supabase queries المهمة (load conversation, send message) — retry تلقائي 2 مرات للأخطاء العابرة
+- Upload المرفقات — retry + رسالة "Retry" واضحة للمستخدم
+- AI chat send — لو فشل، يحتفظ بالـdraft + زر "Retry"
+- Auth submit — retry للـnetwork errors فقط (مش للـinvalid credentials)
+- Error boundary موجود — نتأكد إنه fallback مفيد + زر "Try again" + "Go home"
+- منع فقدان draft الرسالة لو حصل error — حفظ في sessionStorage
+
+## ملفات جديدة
 
 ```text
-الملفات المتأثرة:
-- src/pages/chat/ChatPage.tsx          → height calc, sticky composer
-- src/pages/auth/AuthPage.tsx          → padding/font scaling, dvh
-- src/components/chat/mobile/MobileChatHeader.tsx → compact mobile
-- src/components/promo/UnlimitedPromoBanner.tsx   → auto-hide on scroll
-- src/pages/marketing/PricingPage.tsx  → glow containment
-- src/pages/settings/SettingsPage.tsx  → sticky header
-- src/index.css                        → body overflow-x-hidden, dvh utils
+src/lib/validation/schemas.ts
+src/lib/guards/rateLimiter.ts
+src/lib/guards/retry.ts
+src/components/common/ConfirmDialog.tsx
+src/hooks/useConfirm.tsx
+```
+
+## ملفات معدلة (تقريباً)
+
+```text
+src/pages/auth/AuthPage.tsx                   → zod, cooldowns, retry
+src/pages/auth/ChangeEmailPage.tsx            → validation + confirm
+src/pages/auth/ChangePasswordPage.tsx         → validation + confirm
+src/pages/auth/DeleteAccountPage.tsx          → typed-confirm
+src/pages/chat/ChatPage.tsx                   → schema + debounce + retry
+src/components/chat/sidebar/* (delete convo)  → confirm
+src/components/promo/* / pricing buttons      → inflight guard
+src/pages/settings/SettingsPage.tsx           → save throttle
+src/components/common/OfflineBanner.tsx       → expand for transient retry
 ```
 
 ## ما لن أعمله
 
-- لن أعيد تصميم الصفحات أو ألوان أو typography
-- لن أعدل business logic
-- لن ألمس صفحات marketing/landing (لم تطلبها)
+- لن أضيف backend rate limiting (مش متاح كـprimitive حالياً — موضح في الـguidelines)
+- لن أغير business logic أو UI styling
+- لن ألمس Supabase tables أو RLS
 
-هل تأكد التنفيذ بهذا الترتيب؟ أو تريد تركيز أكبر على صفحة معينة أولاً؟
+## ترتيب التنفيذ
+
+1. الـbuilding blocks (schemas + guards + ConfirmDialog) — أساس لكل اللي بعده
+2. Auth (أعلى أثر أمني)
+3. Chat composer (الأكثر استخداماً)
+4. Billing/Settings (الأكثر خطورة على الفلوس والبيانات)
+
+تأكد علشان أبدأ التنفيذ.
