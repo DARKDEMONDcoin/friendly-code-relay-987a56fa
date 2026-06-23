@@ -1,76 +1,69 @@
-## Desktop redesign — Manus dual workspace
+# خطة إصلاح الاستجابة عبر الصفحات
 
-Direction locked: **v3 "Manus dual workspace"** (cream `#FDFCFB`, ink `#1A1A17`, Instrument Serif headings, Inter body, JetBrains Mono captions, 480px chat rail + flexible canvas workspace, floating action bar).
+## ما اكتشفته من الفحص الفعلي
 
-Scope is **desktop only (≥ lg)**. Mobile keeps its current shell. No backend/business‑logic changes.
+فحصت الصفحات على 4 مقاسات (375×667 / 414×896 / 820×1024 / 1280×800) وحقنت جلسة تسجيل الدخول لفحص /chat و /settings. النتائج:
 
-### 1. Design tokens (new)
+- **لا يوجد horizontal overflow** على أي صفحة ✅
+- **Vertical overflow على /chat على iPhone SE**: المحتوى 720px لكن الشاشة 667px → الـcomposer أو الـheader مقطوع 53px
+- **Vertical overflow على /auth على iPhone SE**: 731 > 667 → زر "Continue" تحت الـfold
+- **Vertical overflow على /chat tablet**: 1061 > 1024 → 37px مقطوع
+- **عناصر زخرفية (blur blobs) تتجاوز العرض** لكن داخل `overflow-hidden` فلا تسبب scroll حقيقي
+- **بانر العرض الجديد يضيف ~45px** قد يكون السبب الأساسي في chat overflow
 
-- Add `src/styles/manus-theme.css` with cream/ink palette, the three font families (via `@fontsource/instrument-serif`, `@fontsource/inter`, `@fontsource/jetbrains-mono`), and helper classes (`.manus-surface`, `.manus-canvas`, `.manus-rail`, `.manus-serif`, `.manus-mono`, ink button styles, hairline borders).
-- Register fonts in `src/main.tsx`. Extend `tailwind.config.ts` with `fontFamily.serif = ['"Instrument Serif"', ...]`, `fontFamily.mono`, and `colors.manus.{cream, canvas, ink, hairline, muted}` mapped to CSS vars.
-- The tokens are gated behind a `[data-shell="manus"]` attribute on the shell root so they never leak into mobile or marketing pages.
+## الإصلاحات المقترحة
 
-### 2. New desktop shell component
+### 1. صفحة الشات (Chat) — الأولوية الأولى
 
-Create `src/pages/chat/components/desktop/ManusDesktopShell.tsx`:
+- التأكد من أن `--promo-banner-h` يُطرح من ارتفاع shell الشات بشكل صحيح، وأن الـcomposer دائماً مرئي.
+- استخدام `100dvh` (مع fallback للـ`100vh`) ووضع الـcomposer كـ`sticky bottom-0` على الموبايل لضمان وصوله بدون scroll.
+- تقليل padding الـheader والـcomposer على الشاشات تحت 400px.
+- إخفاء البانر تلقائياً عند الـscroll لأسفل على الموبايل (auto-hide) لتوفير مساحة.
+
+### 2. صفحة التسجيل (Auth) — الأولوية الثانية
+
+- مراجعة `AuthPage.tsx` لضمان أن الفورم بالكامل (Email + Continue + Social) يدخل في 600px ارتفاع.
+- تقليل padding عمودي و font sizes على mobile.
+- استخدام `min-h-[100dvh]` بدل `min-h-screen` لتجنب مشاكل URL bar.
+- جعل الصفحة قابلة للـscroll بطبيعية إذا فعلاً المحتوى أطول (بدل قص أو fixed).
+
+### 3. صفحات الإعدادات (Settings) والأسعار (Pricing)
+
+- صفحات طويلة بطبيعتها → الـscroll مقبول. الإصلاحات هنا:
+  - تثبيت header الإعدادات على الموبايل ليبقى زر "Back" متاح
+  - تقليل حجم الكروت على tablet
+  - إصلاح blur blobs الزخرفية لتكون داخل `overflow-hidden` parent دائماً
+
+### 4. إصلاحات عامة (shared)
+
+- إضافة `overflow-x-hidden` على `body` كحماية من أي عنصر زخرفي
+- توحيد استخدام `100dvh` بدل `100vh` في كل الـshells (auth, chat, settings)
+- مراجعة `tailwind.config` للتأكد من breakpoint `xs` (إن وُجد) أو إضافته للموبايلات الصغيرة (≤375px)
+
+## الترتيب التنفيذي
+
+1. **Chat shell** — أهم إصلاح (composer reachability)
+2. **Auth page** — يؤثر على التحويل
+3. **Settings header sticky** — quality of life
+4. **Pricing decorative blobs** — تنظيف بصري
+
+## التفاصيل التقنية (للمراجعة)
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│ ManusDesktopShell  data-shell="manus"                       │
-│ ┌──────────────┐ ┌────────────────────────────────────────┐ │
-│ │  Rail 480px  │ │  Canvas (flex-1, bg cream-canvas)      │ │
-│ │  - Brand     │ │  ┌──────────────────────────────────┐  │ │
-│ │  - Greeting  │ │  │ Browser-chrome card              │  │ │
-│ │    (serif)   │ │  │  • tab strip / url pill          │  │ │
-│ │  - Messages  │ │  │  • content slot (mode-aware:     │  │ │
-│ │  - Composer  │ │  │    media grid / slides / docs /  │  │ │
-│ │    (Cmd+Ent) │ │  │    research / operator preview)  │  │ │
-│ │              │ │  └──────────────────────────────────┘  │ │
-│ │              │ │  Floating: Export Draft + Settings     │ │
-│ └──────────────┘ └────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+الملفات المتأثرة:
+- src/pages/chat/ChatPage.tsx          → height calc, sticky composer
+- src/pages/auth/AuthPage.tsx          → padding/font scaling, dvh
+- src/components/chat/mobile/MobileChatHeader.tsx → compact mobile
+- src/components/promo/UnlimitedPromoBanner.tsx   → auto-hide on scroll
+- src/pages/marketing/PricingPage.tsx  → glow containment
+- src/pages/settings/SettingsPage.tsx  → sticky header
+- src/index.css                        → body overflow-x-hidden, dvh utils
 ```
 
-The shell is a thin presentational wrapper: it receives `messagesSlot`, `composerSlot`, `canvasSlot`, `headerSlot` as props and applies the new chrome. **All existing chat logic, hooks, services, and state in `ChatPage.tsx` stay untouched.**
+## ما لن أعمله
 
-### 3. Mount path
+- لن أعيد تصميم الصفحات أو ألوان أو typography
+- لن أعدل business logic
+- لن ألمس صفحات marketing/landing (لم تطلبها)
 
-In `ChatPage.tsx`, when `!isMobile`, render `ManusDesktopShell` instead of the current desktop layout and pass the existing `ChatMessagesArea`, `ChatComposerSection`, `DesktopChatHeader`, and the operator/media/slides preview (existing `OperatorWorkspace` inline) into the canvas slot. The mobile branch is untouched.
-
-### 4. Per-mode canvas content
-
-The right "browser card" picks content from the active mode (already known via `useChatModeState`):
-- chat → conversation summary card with metric tiles styled as in the prototype, plus inline operator/tool activity.
-- images / videos → media gallery in cream cards.
-- slides → live slide preview.
-- deep research → research outline + sources.
-- learning → study material.
-
-Each maps to the **existing** preview components — only the wrapper chrome changes.
-
-### 5. Landing and other site pages
-
-User said "كل صفحات الموقع" earlier but now clarified "للكومبيوتر فقط". I'll start with the **desktop chat shell** (highest‑traffic surface) in this pass. After approval I'll roll the same tokens into `LandingPage`, `PricingPage`, `SettingsPage`, and `BillingPage` on desktop in follow‑up passes.
-
-### Files to add / edit
-
-| Action | Path |
-| --- | --- |
-| add | `src/styles/manus-theme.css` |
-| add | `src/pages/chat/components/desktop/ManusDesktopShell.tsx` |
-| add | `src/pages/chat/components/desktop/ManusBrowserCard.tsx` |
-| add | `src/pages/chat/components/desktop/ManusFloatingActions.tsx` |
-| edit | `src/main.tsx` (font imports + css import) |
-| edit | `tailwind.config.ts` (font families + manus colors) |
-| edit | `src/pages/chat/ChatPage.tsx` (desktop branch only — swap layout wrapper) |
-
-### Out of scope (this pass)
-
-- Mobile chat surface
-- Marketing / settings / billing pages (next pass after approval)
-- Any backend, edge-function, or model logic
-- Logo asset change (kept current Megsy mark)
-
-### Risk
-
-`ChatPage.tsx` is large; I will keep edits confined to the JSX that picks desktop vs mobile, so the existing 1700‑line state graph is preserved verbatim.
+هل تأكد التنفيذ بهذا الترتيب؟ أو تريد تركيز أكبر على صفحة معينة أولاً؟
