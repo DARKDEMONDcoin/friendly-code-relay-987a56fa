@@ -31,6 +31,8 @@ import TranslationWrapper from "./components/common/TranslationWrapper";
 import AmbientBackground from "./components/common/AmbientBackground";
 import UnlimitedPromoBanner from "./components/promo/UnlimitedPromoBanner";
 import { PromoBannerProvider } from "./components/promo/PromoBannerContext";
+import { ConfirmProvider } from "./components/common/ConfirmDialog";
+
 import { usePromoBanner } from "./components/promo/usePromoBanner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
