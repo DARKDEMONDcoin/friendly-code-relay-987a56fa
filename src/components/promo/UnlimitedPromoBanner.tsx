@@ -69,19 +69,22 @@ const UnlimitedPromoBanner = () => {
       <button
         type="button"
         onClick={goPricing}
-        className="group relative mx-auto flex w-full max-w-6xl items-center justify-center gap-3 px-10 py-2 text-left transition-opacity hover:opacity-90"
+        className="group relative mx-auto flex w-full max-w-6xl items-center justify-center gap-2 px-9 py-2 text-left transition-opacity hover:opacity-90 sm:gap-3 sm:px-10"
       >
         {/* NEW pill */}
         <span
-          className="hidden xs:inline-flex shrink-0 items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-white"
+          className="shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-white"
           style={{ background: "hsl(0 0% 100% / 0.08)" }}
         >
-          NEW
+          50% OFF
         </span>
 
-        {/* Headline */}
-        <span className="truncate text-[12.5px] font-medium text-white/90 sm:text-[13px]">
-          Get 50% off your first 3 months of Megsy Pro.
+        {/* Headline — shorter on mobile, full on sm+ */}
+        <span className="shrink min-w-0 text-[12px] font-medium text-white/90 sm:text-[13px]">
+          <span className="sm:hidden">Megsy Pro — first 3 months</span>
+          <span className="hidden sm:inline">
+            Get 50% off your first 3 months of Megsy Pro.
+          </span>
         </span>
 
         {/* Hairline separator */}
@@ -91,12 +94,12 @@ const UnlimitedPromoBanner = () => {
           style={{ background: "hsl(0 0% 100% / 0.12)" }}
         />
 
-        {/* Countdown */}
+        {/* Countdown — always visible */}
         <span
-          className="hidden shrink-0 items-center gap-1 font-mono text-[11px] tabular-nums text-white/60 sm:inline-flex"
+          className="shrink-0 inline-flex items-center gap-1 font-mono text-[10.5px] tabular-nums text-white/60 sm:text-[11px]"
           aria-live="polite"
         >
-          <span className="text-white/40">Ends in</span>
+          <span className="hidden text-white/40 sm:inline">Ends in</span>
           <span className="text-white/90">
             {days > 0 ? `${days}d ` : ""}
             {pad(hours)}:{pad(minutes)}:{pad(seconds)}
@@ -104,7 +107,7 @@ const UnlimitedPromoBanner = () => {
         </span>
 
         {/* CTA link */}
-        <span className="inline-flex shrink-0 items-center gap-0.5 text-[12px] font-semibold text-white underline-offset-4 group-hover:underline">
+        <span className="hidden shrink-0 items-center gap-0.5 text-[12px] font-semibold text-white underline-offset-4 group-hover:underline sm:inline-flex">
           Claim offer
           <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
