@@ -71,7 +71,7 @@ const MegsyVideoModelsSection = () => {
   const c = COPY[locale.code] ?? COPY.en;
 
   return (
-    <section id="anchor-video-models-section" className="relative overflow-hidden py-20 md:py-36">
+    <section id="anchor-video-models-section" className="relative scroll-mt-28 overflow-hidden py-20 md:py-28">
       <div className="absolute left-1/4 top-1/3 -z-10 h-[600px] w-[600px] rounded-full bg-cyan-500/10 blur-[160px]" />
 
       <div className="mx-auto max-w-7xl px-6">
