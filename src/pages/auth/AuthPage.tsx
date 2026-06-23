@@ -14,6 +14,9 @@ import megsyIconUrl from "@/assets/megsy-icon-transparent.png";
 
 import { t as authT, translateAuthError } from "@/lib/authI18n";
 import { getMfaRedirect } from "@/lib/mfa";
+import { emailSchema, passwordSchema, passwordLoginSchema, firstError } from "@/lib/validation/schemas";
+import { useRateLimit } from "@/lib/guards/rateLimiter";
+
 type Step =
   | "intro1"
   | "email"
@@ -109,15 +112,27 @@ const AuthPage = () => {
     }, 1000);
   };
 
+  // Client-side rate limits: protect users (and the backend) from spamming
+  // the same action — accidentally or otherwise.
+  const checkEmailLimit = useRateLimit(5, 30_000);
+  const passwordLoginLimit = useRateLimit(8, 60_000);
+
   const handleCheckEmail = async () => {
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail) return;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normalizedEmail)) {
-      toast.error(authT("invalidEmail"));
+    if (isSubmitting) return;
+    const parsed = emailSchema.safeParse(email);
+    const err = firstError(parsed);
+    if (err || !parsed.success) {
+      toast.error(err ?? authT("invalidEmail"));
+      return;
+    }
+    const normalizedEmail = parsed.data.toLowerCase();
+    const gate = checkEmailLimit();
+    if (!gate.allow) {
+      toast.error(`Too many attempts. Try again in ${Math.ceil(gate.resetMs / 1000)}s.`);
       return;
     }
     setIsSubmitting(true);
+
     try {
       const { data, error } = await invokeAuth({ action: "check-email", email: normalizedEmail });
       if (error) throw error;
@@ -178,13 +193,25 @@ const AuthPage = () => {
   };
 
   const handlePasswordLogin = async () => {
-    if (!password) return;
+    if (isSubmitting) return;
+    const pwParsed = passwordLoginSchema.safeParse(password);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? "Enter your password");
+      return;
+    }
+    const gate = passwordLoginLimit();
+    if (!gate.allow) {
+      toast.error(`Too many sign-in attempts. Wait ${Math.ceil(gate.resetMs / 1000)}s.`);
+      return;
+    }
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
+
       if (error) throw error;
       const mfa = await getMfaRedirect(redirectUrl || "/chat");
       if (mfa) { navigate(mfa); return; }
@@ -393,11 +420,15 @@ const AuthPage = () => {
   };
 
   const handleCreateAccount = async () => {
-    if (!newPassword || newPassword.length < 8) {
-      toast.error(authT("passwordMinLength"));
+    if (isSubmitting) return;
+    const pwParsed = passwordSchema.safeParse(newPassword);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? authT("passwordMinLength"));
       return;
     }
     setIsSubmitting(true);
+
     try {
       const cleanReferral = referralCode.trim().toUpperCase().slice(0, 64) || null;
 
@@ -486,11 +517,15 @@ const AuthPage = () => {
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword || newPassword.length < 8) {
-      toast.error(authT("passwordMinLength"));
+    if (isSubmitting) return;
+    const pwParsed = passwordSchema.safeParse(newPassword);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? authT("passwordMinLength"));
       return;
     }
     setIsSubmitting(true);
+
     try {
       void verifiedResetCode;
       const normalizedEmail = email.trim().toLowerCase();
