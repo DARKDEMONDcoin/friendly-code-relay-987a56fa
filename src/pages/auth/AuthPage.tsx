@@ -420,11 +420,15 @@ const AuthPage = () => {
   };
 
   const handleCreateAccount = async () => {
-    if (!newPassword || newPassword.length < 8) {
-      toast.error(authT("passwordMinLength"));
+    if (isSubmitting) return;
+    const pwParsed = passwordSchema.safeParse(newPassword);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? authT("passwordMinLength"));
       return;
     }
     setIsSubmitting(true);
+
     try {
       const cleanReferral = referralCode.trim().toUpperCase().slice(0, 64) || null;
 
@@ -513,11 +517,15 @@ const AuthPage = () => {
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword || newPassword.length < 8) {
-      toast.error(authT("passwordMinLength"));
+    if (isSubmitting) return;
+    const pwParsed = passwordSchema.safeParse(newPassword);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? authT("passwordMinLength"));
       return;
     }
     setIsSubmitting(true);
+
     try {
       void verifiedResetCode;
       const normalizedEmail = email.trim().toLowerCase();
