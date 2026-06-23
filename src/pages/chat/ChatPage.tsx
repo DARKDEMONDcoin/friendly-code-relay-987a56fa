@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { MAX_CHAT_MESSAGE_CHARS } from "@/lib/validation/schemas";
+
 import { getCachedUser } from "@/lib/cachedUser";
 import AppSidebar from "@/components/layout/AppSidebar";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
