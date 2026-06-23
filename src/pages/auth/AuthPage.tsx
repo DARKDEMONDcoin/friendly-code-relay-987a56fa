@@ -193,13 +193,25 @@ const AuthPage = () => {
   };
 
   const handlePasswordLogin = async () => {
-    if (!password) return;
+    if (isSubmitting) return;
+    const pwParsed = passwordLoginSchema.safeParse(password);
+    const pwErr = firstError(pwParsed);
+    if (pwErr || !pwParsed.success) {
+      toast.error(pwErr ?? "Enter your password");
+      return;
+    }
+    const gate = passwordLoginLimit();
+    if (!gate.allow) {
+      toast.error(`Too many sign-in attempts. Wait ${Math.ceil(gate.resetMs / 1000)}s.`);
+      return;
+    }
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
+
       if (error) throw error;
       const mfa = await getMfaRedirect(redirectUrl || "/chat");
       if (mfa) { navigate(mfa); return; }
