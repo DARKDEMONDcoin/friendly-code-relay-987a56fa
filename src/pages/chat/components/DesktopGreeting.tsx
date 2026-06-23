@@ -8,9 +8,12 @@ interface DesktopGreetingProps {
 }
 
 /**
- * Desktop empty-state greeting — "Editorial Quiet".
- * Warm ivory canvas, rotating dotted halo around a coral mark,
- * mixed serif + sans typography, soft date pill, breathing space.
+ * Desktop empty-state greeting — matches the Referral landing aesthetic:
+ * primary radial glow, faint grid overlay, centered mark with blurred halo,
+ * bold headline + muted subline, soft gradient panel with ring-border.
+ *
+ * Mobile is intentionally untouched (`hidden md:flex`); the mobile landing
+ * is rendered by `MobileChatLandingMount`.
  */
 export const DesktopGreeting = ({
   userName,
@@ -19,6 +22,8 @@ export const DesktopGreeting = ({
 }: DesktopGreetingProps) => {
   const raw = userName || "there";
   const dname = raw.charAt(0).toUpperCase() + raw.slice(1);
+  const initial = dname.charAt(0).toUpperCase();
+
   const now = new Date();
   const h = now.getHours();
   const part =
@@ -46,132 +51,111 @@ export const DesktopGreeting = ({
   });
 
   return (
-    <div className="relative z-10 hidden md:flex items-center justify-center px-6 pt-16 pb-20 md:pt-0 md:pb-[210px]">
-      {/* Soft warm wash behind the composition */}
+    <div className="relative z-10 hidden md:flex items-center justify-center px-6 pt-16 pb-20 md:pt-0 md:pb-[210px] overflow-hidden">
+      {/* Ambient primary glow — top + bottom radial wash */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 opacity-70"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 38%, rgba(217,119,87,0.10), transparent 70%), radial-gradient(40% 40% at 80% 70%, rgba(180,150,110,0.08), transparent 70%)",
+            "radial-gradient(60% 50% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%), radial-gradient(50% 40% at 50% 100%, hsl(var(--primary) / 0.15), transparent 70%)",
+        }}
+      />
+
+      {/* Faint grid overlay */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
         }}
       />
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative flex flex-col items-center w-full max-w-2xl text-center"
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="relative flex flex-col items-center w-full max-w-md text-center"
       >
-        {/* Date pill */}
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.5 }}
-          className="mb-8 inline-flex items-center gap-2 rounded-full px-3 py-1"
-          style={{
-            background: "rgba(60,50,40,0.05)",
-            border: "1px solid rgba(60,50,40,0.08)",
-            color: "#6b6862",
-            fontFamily: '"DM Sans","Inter",system-ui,sans-serif',
-            fontSize: 12,
-            letterSpacing: "0.02em",
-          }}
-        >
-          <span
-            className="inline-block h-1.5 w-1.5 rounded-full"
-            style={{ background: "#d97757" }}
-          />
-          {dateLabel}
-        </motion.div>
+        {/* Brand */}
+        <div className="flex items-center justify-center pt-2">
+          <span className="text-[13px] font-semibold tracking-tight text-muted-foreground">
+            Megsy <span className="text-foreground">AI</span>
+          </span>
+        </div>
 
-        {/* Rotating dotted halo + coral mark */}
+        {/* Avatar mark with blurred primary halo */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.08, duration: 0.55 }}
-          className="relative mb-8 h-[72px] w-[72px]"
-          aria-hidden
+          transition={{ delay: 0.08, duration: 0.5 }}
+          className="relative mt-8 mb-6"
         >
-          <motion.div
-            className="absolute inset-0"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 36, ease: "linear", repeat: Infinity }}
-          >
-            <svg viewBox="0 0 72 72" className="h-full w-full">
-              <circle
-                cx="36"
-                cy="36"
-                r="33"
-                fill="none"
-                stroke="rgba(60,50,40,0.18)"
-                strokeWidth="1"
-                strokeDasharray="1 5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </motion.div>
           <div
-            className="absolute inset-[14px] rounded-full flex items-center justify-center"
-            style={{
-              background:
-                "radial-gradient(circle at 30% 30%, #ef8a64, #c8623f 70%)",
-              boxShadow:
-                "0 6px 18px -6px rgba(200,90,55,0.45), inset 0 1px 0 rgba(255,255,255,0.35)",
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <g stroke="#fff" strokeWidth="1.6" strokeLinecap="round">
-                <line x1="12" y1="3" x2="12" y2="8" />
-                <line x1="12" y1="16" x2="12" y2="21" />
-                <line x1="3" y1="12" x2="8" y2="12" />
-                <line x1="16" y1="12" x2="21" y2="12" />
-                <line x1="5.5" y1="5.5" x2="9" y2="9" />
-                <line x1="15" y1="15" x2="18.5" y2="18.5" />
-                <line x1="18.5" y1="5.5" x2="15" y2="9" />
-                <line x1="9" y1="15" x2="5.5" y2="18.5" />
-              </g>
-            </svg>
+            aria-hidden
+            className="absolute -inset-2 rounded-full blur-xl"
+            style={{ background: "hsl(var(--primary) / 0.45)" }}
+          />
+          <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-card text-2xl font-semibold text-foreground ring-1 ring-border">
+            {initial}
           </div>
         </motion.div>
 
-        {/* Editorial headline: serif lead + italic name */}
-        <h1
-          className="text-[54px] md:text-[64px] leading-[1.02]"
-          style={{
-            fontFamily: '"Instrument Serif","Source Serif Pro",Georgia,serif',
-            fontWeight: 400,
-            color: "#1f1e1c",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {lead},{" "}
-          <span style={{ fontStyle: "italic", color: "#c8623f" }}>{tail}</span>
+        {/* Tagline */}
+        <p className="text-sm text-muted-foreground">
+          <span
+            className="inline-block h-1.5 w-1.5 rounded-full align-middle mr-2"
+            style={{ background: "hsl(var(--primary))" }}
+          />
+          {dateLabel}
+        </p>
+
+        {/* Headline */}
+        <h1 className="mt-5 text-[34px] font-bold leading-[1.1] tracking-tight text-foreground sm:text-[44px]">
+          {lead}, <span style={{ color: "hsl(var(--primary))" }}>{tail}</span>
         </h1>
+        <p className="mx-auto mt-3 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
+          One workspace for chat, images, video, code and research — ask anything,
+          paste anything, start anywhere.
+        </p>
 
-        {/* Subline */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.22, duration: 0.5 }}
-          className="mx-auto mt-5 max-w-md text-[15.5px] leading-relaxed"
+        {/* Soft feature panel — mirrors the referral "gift card" */}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mt-8 w-full rounded-2xl p-5 ring-1 ring-border backdrop-blur-sm"
           style={{
-            color: "#6b6862",
-            fontFamily: '"DM Sans","Inter",system-ui,sans-serif',
+            background:
+              "linear-gradient(160deg, hsl(var(--card) / 0.9) 0%, hsl(var(--muted) / 0.6) 100%)",
           }}
         >
-          A quiet place to think out loud. Ask anything, paste anything,
-          start anywhere.
-        </motion.p>
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Quick start
+            </span>
+            <span
+              dir="ltr"
+              className="rounded-full px-2.5 py-0.5 font-mono text-[11px] text-primary-foreground"
+              style={{ background: "hsl(var(--primary))" }}
+            >
+              ⌘ K
+            </span>
+          </div>
+          <p className="mt-3 text-[15px] font-medium text-foreground">
+            Type a message below or{" "}
+            <span style={{ color: "hsl(var(--primary))" }} className="font-semibold">
+              pick a mode
+            </span>{" "}
+            to begin
+          </p>
+        </motion.div>
 
-        {/* Hairline divider — editorial flourish */}
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          transition={{ delay: 0.35, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-10 h-px w-24 origin-center"
-          style={{ background: "rgba(60,50,40,0.18)" }}
-        />
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          Chat · Images · Video · Research · Slides
+        </p>
       </motion.div>
     </div>
   );
