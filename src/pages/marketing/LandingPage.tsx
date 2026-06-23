@@ -22,7 +22,7 @@ const CreativeBlueprintsSection = lazy(
 const MegsyChatModelsSection = lazy(() => import("@/components/landing/MegsyChatModelsSection"));
 const MegsyImageModelsSection = lazy(() => import("@/components/landing/MegsyImageModelsSection"));
 const MegsyCodeModelsSection = lazy(() => import("@/components/landing/MegsyCodeModelsSection"));
-const MegsyOSSection = lazy(() => import("@/components/landing/MegsyOSSection"));
+const MegsyVideoModelsSection = lazy(() => import("@/components/landing/MegsyVideoModelsSection"));
 const HowItWorks = lazy(() => import("@/components/landing/HowItWorks"));
 const PricingPreview = lazy(() => import("@/components/landing/PricingPreview"));
 const ReferralSection = lazy(() => import("@/components/landing/ReferralSection"));
@@ -138,8 +138,9 @@ const LandingPage = ({ locale = "en" }: LandingPageProps) => {
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><StatsMarquee /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><HorizontalGallery /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><StickyFeatureTabs /></Suspense></div>
-          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyOSSection /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyChatModelsSection /></Suspense></div>
+          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyImageModelsSection /></Suspense></div>
+          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyVideoModelsSection /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><ParallaxShowcase /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><ShowcaseGallery /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyCodeModelsSection /></Suspense></div>

@@ -10,7 +10,6 @@ const models = [
   { name: "Megsy Docs" },
   { name: "Megsy Code" },
   { name: "Megsy Research" },
-  { name: "Megsy OS" },
 ];
 
 const StatsMarquee = () => {
