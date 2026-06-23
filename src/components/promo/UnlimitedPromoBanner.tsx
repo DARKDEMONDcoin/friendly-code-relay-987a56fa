@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { X, Infinity as InfinityIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { usePromoCountdown } from "@/hooks/usePromoCountdown";
 
 const pad = (n: number) => String(n).padStart(2, "0");
-const DISMISS_KEY = "promo-banner-dismissed-v3";
+const DISMISS_KEY = "promo-banner-dismissed-v4";
+const PROMO_CODE = "LAST50";
 
 const UnlimitedPromoBanner = () => {
   const navigate = useNavigate();
@@ -50,99 +51,132 @@ const UnlimitedPromoBanner = () => {
     setDismissed(true);
   };
 
-  const handleClaim = () => navigate("/pricing");
-
   if (!visible) return null;
 
-  const TimeChip = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center justify-center min-w-[28px] rounded-md bg-white/10 px-1.5 py-0.5 leading-none">
-      <span className="tabular-nums text-[12px] font-semibold text-white">
-        {pad(value)}
-      </span>
-      <span className="text-[8px] uppercase tracking-wider text-white/60 mt-0.5">
-        {label}
-      </span>
-    </div>
-  );
+  // Urgency level: pulses red the closer we get to expiry
+  const urgent = days === 0 && hours < 12;
 
   return (
     <div
       ref={ref}
       role="region"
-      aria-label="Unlimited plan limited time offer"
-      className="relative z-40 w-full overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(95deg, #1a0f2e 0%, #2a1b4a 45%, #3a1a5a 70%, #1a0f2e 100%)",
-      }}
+      aria-label="عرض الاشتراك المحدود"
+      dir="rtl"
+      className="relative z-40 w-full overflow-hidden bg-background"
     >
-      {/* amber sheen */}
+      {/* Primary ambient glow — referral style */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 opacity-80"
         style={{
           background:
-            "radial-gradient(ellipse 50% 140% at 50% 50%, rgba(251,191,36,0.12), transparent 60%)",
+            "radial-gradient(80% 120% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%)",
         }}
       />
-      {/* bottom hairline */}
+      {/* Subtle grid */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+      {/* Bottom hairline */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent)",
+            "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)",
         }}
       />
 
-      <div className="relative mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 pr-10 sm:gap-3 sm:px-4">
-        {/* Icon badge */}
-        <span
-          aria-hidden
-          className="hidden xs:inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-black shadow-[0_0_18px_rgba(251,191,36,0.35)]"
-        >
-          <InfinityIcon className="h-3.5 w-3.5" strokeWidth={3} />
-        </span>
-
-        {/* Copy */}
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30">
-            50% OFF
+      <div className="relative mx-auto flex w-full max-w-6xl items-center gap-3 px-3 py-2.5 pl-10 sm:px-4 sm:pl-12">
+        {/* LIVE dot + label */}
+        <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span
+              className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+              style={{ background: "hsl(var(--primary))" }}
+            />
+            <span
+              className="relative inline-flex h-1.5 w-1.5 rounded-full"
+              style={{ background: "hsl(var(--primary))" }}
+            />
           </span>
-          <span className="truncate text-[13px] font-semibold text-white sm:text-sm">
-            Unlimited{" "}
-            <span className="font-normal text-white/70">
-              Chat · Images · Videos
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            LIVE
+          </span>
+        </div>
+
+        {/* Copy — dark psychology, Arabic */}
+        <button
+          type="button"
+          onClick={() => navigate("/pricing")}
+          className="group flex min-w-0 flex-1 items-center gap-2 text-right"
+        >
+          <span className="truncate text-[13px] font-semibold leading-tight text-foreground sm:text-sm">
+            آخر فرصة —{" "}
+            <span className="text-muted-foreground font-normal">
+              السعر يرجع ضعف بعد العرض
             </span>
+          </span>
+        </button>
+
+        {/* Promo code pill (referral style) */}
+        <div
+          dir="ltr"
+          className="hidden shrink-0 items-center gap-2 rounded-full px-2.5 py-1 ring-1 ring-border backdrop-blur-sm sm:inline-flex"
+          style={{
+            background:
+              "linear-gradient(160deg, hsl(var(--card) / 0.9), hsl(var(--muted) / 0.6))",
+          }}
+        >
+          <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            CODE
+          </span>
+          <span
+            className="font-mono text-[11px] font-semibold"
+            style={{ color: "hsl(var(--primary))" }}
+          >
+            {PROMO_CODE}
           </span>
         </div>
 
         {/* Timer */}
         <div
-          className="hidden items-center gap-1 sm:flex"
+          dir="ltr"
+          className={`shrink-0 font-mono tabular-nums text-[12px] font-semibold ${
+            urgent ? "text-red-400 animate-pulse" : "text-foreground"
+          }`}
           aria-live="polite"
         >
-          <TimeChip value={days} label="d" />
-          <TimeChip value={hours} label="h" />
-          <TimeChip value={minutes} label="m" />
-          <TimeChip value={seconds} label="s" />
+          {days > 0 ? `${days}d ` : ""}
+          {pad(hours)}:{pad(minutes)}:{pad(seconds)}
         </div>
 
         {/* CTA */}
         <button
           type="button"
-          onClick={handleClaim}
-          className="shrink-0 rounded-full bg-gradient-to-r from-amber-300 to-amber-500 px-3 py-1.5 text-[12px] font-bold text-black shadow-[0_4px_14px_rgba(251,191,36,0.35)] transition-transform active:scale-95 hover:brightness-110"
+          onClick={() => navigate("/pricing")}
+          className="shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-primary-foreground transition active:scale-[0.97] hover:opacity-90"
+          style={{
+            background:
+              "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.75) 100%)",
+            boxShadow: "0 6px 24px -6px hsl(var(--primary) / 0.6)",
+          }}
         >
-          Claim
+          احجز السعر
         </button>
 
         {/* Dismiss */}
         <button
           type="button"
           onClick={handleDismiss}
-          aria-label="Dismiss offer"
-          className="absolute right-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="إغلاق"
+          className="absolute left-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
