@@ -771,7 +771,7 @@ const AuthPage = () => {
               </AnimatePresence>
             </div>
 
-            <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-6 lg:pb-16 pt-2 lg:pt-4 lg:min-h-[calc(100vh-88px)]">
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 pb-4 sm:px-6 sm:pb-6 lg:pb-16 pt-2 lg:pt-4 lg:min-h-[calc(100dvh-88px)]">
               <div className="w-full max-w-[400px]">
                 {/* Headline */}
                 <AnimatePresence mode="wait">
