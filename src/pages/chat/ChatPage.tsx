@@ -682,6 +682,15 @@ const ChatPage = () => {
     const hasFrames = chatMode === "video" && videoStartEndMode && !!startFrameUrl && !!endFrameUrl;
     if (!text.trim() && attachedFiles.length === 0 && !hasFrames) return;
     if (isLoading || isSubmittingRef.current) return;
+    // Guard: oversized prompts are almost always a paste accident — refuse
+    // early with a clear message instead of letting the request fail server-side.
+    if (text.length > MAX_CHAT_MESSAGE_CHARS) {
+      toast.error(
+        `Message is too long (${text.length.toLocaleString()} chars). Max is ${MAX_CHAT_MESSAGE_CHARS.toLocaleString()}.`,
+      );
+      return;
+    }
+
     // Premium modes require an authenticated user. Normal/learning/shopping
     // chat stays fully public so anyone can try the product without sign-up.
     const PROTECTED_MODES: ChatMode[] = [
