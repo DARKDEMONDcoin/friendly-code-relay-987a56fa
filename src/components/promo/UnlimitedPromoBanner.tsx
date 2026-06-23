@@ -81,9 +81,9 @@ const UnlimitedPromoBanner = () => {
 
         {/* Headline — shorter on mobile, full on sm+ */}
         <span className="shrink min-w-0 text-[12px] font-medium text-white/90 sm:text-[13px]">
-          <span className="sm:hidden">Megsy Pro — first 3 months</span>
+          <span className="sm:hidden">Unlimited everything · 50% off</span>
           <span className="hidden sm:inline">
-            Get 50% off your first 3 months of Megsy Pro.
+            Unlimited Chat, Images & Videos — 50% off every plan
           </span>
         </span>
 
