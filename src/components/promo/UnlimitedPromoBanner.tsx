@@ -69,8 +69,9 @@ const UnlimitedPromoBanner = () => {
       <button
         type="button"
         onClick={goPricing}
-        className="group relative mx-auto flex w-full max-w-6xl items-center justify-center gap-2 px-9 py-2 text-left transition-opacity hover:opacity-90 sm:gap-3 sm:px-10"
+        className="group relative mx-auto flex w-full max-w-6xl items-center justify-center gap-2 px-9 py-1.5 leading-none text-left transition-opacity hover:opacity-90 sm:gap-3 sm:px-10 sm:py-2"
       >
+
         {/* NEW pill */}
         <span
           className="shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-white"
