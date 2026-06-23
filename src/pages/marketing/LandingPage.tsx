@@ -138,8 +138,9 @@ const LandingPage = ({ locale = "en" }: LandingPageProps) => {
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><StatsMarquee /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><HorizontalGallery /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><StickyFeatureTabs /></Suspense></div>
-          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyOSSection /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyChatModelsSection /></Suspense></div>
+          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyImageModelsSection /></Suspense></div>
+          <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyVideoModelsSection /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><ParallaxShowcase /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><ShowcaseGallery /></Suspense></div>
           <div className="cv-auto"><Suspense fallback={<SectionFallback />}><MegsyCodeModelsSection /></Suspense></div>
