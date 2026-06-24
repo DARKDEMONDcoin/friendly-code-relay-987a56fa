@@ -303,7 +303,7 @@ const BlogPostPage = () => {
             <ul className="space-y-3">
               {related.map((p) => (
                 <li key={p.slug}>
-                  <Link to={`/blog/${p.slug}`} className="block rounded-xl border border-border/60 p-5 hover:bg-foreground/[0.03] transition-colors">
+                  <Link to={p.href} className="block rounded-xl border border-border/60 p-5 hover:bg-foreground/[0.03] transition-colors">
                     <h4 className="font-display text-lg font-semibold tracking-tight">{p.title}</h4>
                     <p className="mt-1.5 text-sm text-muted-foreground">{p.description}</p>
                   </Link>
