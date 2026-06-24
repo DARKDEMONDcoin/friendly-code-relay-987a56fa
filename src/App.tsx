@@ -111,6 +111,7 @@ const AboutPage = lazy(() => import("./pages/marketing/AboutPage"));
 const BlogPage = lazy(() => import("./pages/marketing/BlogPage"));
 const BlogPostPage = lazy(() => import("./pages/marketing/BlogPostPage"));
 const ComparisonPage = lazy(() => import("./pages/marketing/ComparisonPage"));
+const DocsPage = lazy(() => import("./pages/marketing/DocsPage"));
 
 const AIPersonalizationPage = lazy(() => import("./pages/settings/AIPersonalizationPage"));
 const MemoryPage = lazy(() => import("./pages/settings/MemoryPage"));
@@ -607,6 +608,7 @@ const App = () => {
 
                       <Route path="/pricing" element={<PricingPage />} />
                       <Route path="/features-guide" element={<FeaturesGuidePage />} />
+                      <Route path="/docs" element={<DocsPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/egypt" element={<EgyptPage />} />
                       <Route path="/cookies" element={<CookiePolicyPage />} />

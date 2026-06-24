@@ -1,6 +1,7 @@
 // Help center — cartoon redesign on mobile.
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DesktopSettingsLayout } from "@/components/settings/DesktopSettingsLayout";
 import { CartoonPage, CartoonHero, CartoonCard } from "@/components/settings/CartoonSettingsShell";
@@ -112,6 +113,19 @@ export default function SettingsHelpPage() {
 
   const desktopBody = (
     <div className="space-y-8">
+      <Link
+        to="/docs"
+        className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-foreground/[0.04] transition-colors"
+      >
+        <span className="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <BookOpen className="w-4 h-4" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-foreground">Read the full Docs</div>
+          <div className="text-xs text-muted-foreground">Every feature, every setting, plus PWA install guides.</div>
+        </div>
+        <span className="text-xs text-primary font-semibold">Open →</span>
+      </Link>
       {sections.map((sec) => (
         <section key={sec.title}>
           <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/70 mb-2">{sec.title}</p>
@@ -159,6 +173,25 @@ export default function SettingsHelpPage() {
           }}
         />
       </div>
+
+      <Link
+        to="/docs"
+        className="mt-4 flex items-center gap-3 p-4 rounded-2xl"
+        style={{
+          backgroundColor: YELLOW,
+          border: `2.5px solid ${INK}`,
+          boxShadow: `3px 3px 0 ${INK}`,
+        }}
+      >
+        <span className="inline-flex w-10 h-10 items-center justify-center rounded-xl" style={{ backgroundColor: "#fff", border: `2px solid ${INK}` }}>
+          <BookOpen className="w-4 h-4" style={{ color: INK }} />
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px]" style={{ color: INK, fontWeight: 900 }}>Read the full Docs</div>
+          <div className="text-[12px]" style={{ color: INK, fontWeight: 700, opacity: 0.7 }}>Every feature + PWA install guide</div>
+        </div>
+        <span className="text-[12px]" style={{ color: INK, fontWeight: 900 }}>Open →</span>
+      </Link>
 
       <div className="space-y-5 mt-4">
         {filtered.map((sec) => (

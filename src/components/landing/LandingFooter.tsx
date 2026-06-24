@@ -15,6 +15,8 @@ const footerLinks = {
     { label: "About", href: "/about" },
   ],
   Resources: [
+    { label: "Docs", href: "/docs" },
+    { label: "Features Guide", href: "/features-guide" },
     { label: "Blog", href: "/blog" },
     {
       label: "All-in-one vs Stack",
