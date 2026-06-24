@@ -65,36 +65,63 @@ interface GenResult {
   author_name: string;
 }
 
-const SYSTEM = `You are a senior content strategist writing for Megsy AI — an all-in-one AI creation platform.
-You write for Google's Helpful-Content guidelines: original insight, first-hand examples, real numbers, and a clear point of view.
-NEVER fabricate statistics, names, dates, or quotes. If you'd need a source you don't have, leave it out.
+const MEGSY_BRAND = `Megsy AI is an all-in-one AI platform offering:
+- AI Image (text-to-image with multiple top models)
+- AI Video (text-to-video, image-to-video — Veo, Kling, Pixverse families)
+- AI Chat (multi-model assistant with web search)
+- AI Slides (one-prompt deck generation)
+- AI Code (autonomous coding agent)
+- AI Faceswap & Portraits, AI Headshots
+- AI Voice / TTS, AI Music generation
+- AI Document & PPTX, AI Operator (long-horizon agent), AI Research, AI Learning
+- Telegram bot integration, Workspace collaboration
+URL: https://megsyai.com`;
+
+const SYSTEM = `You are a senior content strategist writing exclusively for Megsy AI — an all-in-one AI creation platform.
+${MEGSY_BRAND}
+
+EVERY article you write MUST be about Megsy AI. Always:
+- Name Megsy AI in the title, opening paragraph, at least 2 H2 sections, and the conclusion.
+- Connect the topic to a specific Megsy AI feature, workflow, or comparison.
+- If the topic is a "vs" comparison, give an honest, balanced take but anchor the verdict in how Megsy AI handles the same job.
+- If the topic is a tutorial, show the exact steps inside Megsy AI.
+- If the topic is industry analysis, frame it through Megsy AI's positioning.
+
+Write for Google's Helpful-Content guidelines: original insight, first-hand examples, concrete numbers (ranges only — never invented), and a clear point of view.
+NEVER fabricate statistics, names, dates, quotes, prices, or benchmarks. If a precise number is unknown, use qualitative phrasing or a clearly-labeled range.
 Use second-person voice ("you"), short paragraphs (2-3 sentences max), descriptive H2 / H3, and concrete examples.
 Length target: 2200-2800 English words.`;
 
-const USER_TEMPLATE = (topic: string, angle?: string) => `Write a high-quality, original SEO blog post for Megsy AI.
+const USER_TEMPLATE = (topic: string, angle?: string) => `Write a high-quality, original SEO blog post for Megsy AI's own blog.
 
 TOPIC: ${topic}
 ${angle ? `ANGLE / KEY ARGUMENT: ${angle}` : ""}
 
+Requirements:
+- Title MUST contain "Megsy AI".
+- Opening paragraph MUST mention Megsy AI by name.
+- Include at least one comparison table in markdown.
+- Include one concrete step-by-step workflow that uses Megsy AI.
+- Add an internal link suggestion (markdown) to https://megsyai.com or a relevant tool subpath at least once.
+- Avoid AI-cliché openers ("in today's world", "in the rapidly evolving", "in the digital age").
+- Never invent stats. Use ranges or qualitative phrasing.
+- Never trash competitors — frame comparisons as honest trade-offs.
+
 Return a single JSON object — no markdown fences, no commentary — with this exact shape:
 {
-  "title": "compelling 50-65 char title with primary keyword early",
+  "title": "compelling 50-65 char title containing 'Megsy AI' and the primary keyword",
   "slug_suggestion": "kebab-case-slug-under-80-chars",
-  "meta_description": "140-158 char meta description with primary keyword + benefit + soft CTA",
-  "excerpt": "2-sentence hook for cards",
-  "content_md": "FULL markdown body, 2200-2800 words, starting with one strong opening paragraph (NO H1 — the page renders the title separately). Use H2 sections, occasional H3, bullet lists, and at least one comparison table in markdown. Include at least one concrete workflow example with steps. End with a 'Key takeaways' section.",
-  "keywords": ["5-10 SEO keywords, primary first"],
+  "meta_description": "140-158 char meta with primary keyword + Megsy AI + benefit + soft CTA",
+  "excerpt": "2-sentence hook mentioning Megsy AI",
+  "content_md": "FULL markdown body, 2200-2800 words, no H1 (title rendered separately). Use H2 sections, occasional H3, bullet lists, and at least one comparison table. Include the workflow steps. End with a 'Key takeaways' section.",
+  "keywords": ["5-10 SEO keywords, primary first; include 'Megsy AI' as one of them"],
   "tags": ["3-6 short tags"],
   "category": "AI Guides | AI Tools | Productivity | Creator Economy | SEO | Tutorials",
-  "faq": [{"q":"natural question","a":"40-80 word answer"}, ...4-6 items],
+  "faq": [{"q":"natural question","a":"40-80 word answer mentioning Megsy AI where natural"}, ...4-6 items],
   "author_name": "Megsy Editorial"
 }
 
-Hard rules:
-- Do NOT use the phrase "in today's world", "in the rapidly evolving", "in the digital age" or any AI-cliché opener.
-- Do NOT invent stats. If you'd cite a number, phrase it as a range or qualitative observation.
-- Do NOT mention competitors by name negatively.
-- Output MUST be a single valid JSON object and nothing else.`;
+Output MUST be a single valid JSON object and nothing else.`;
 
 async function callLLM(topic: string, angle?: string): Promise<GenResult> {
   const llm = await getLLM();
