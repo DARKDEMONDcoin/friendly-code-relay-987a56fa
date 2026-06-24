@@ -628,7 +628,7 @@ export default function DocsPage() {
                   <article key={s.id} id={s.id} className="scroll-mt-28">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 text-primary">
-                        <Icon className="w-4.5 h-4.5" />
+                        <Icon className="w-4 h-4" />
                       </span>
                       <h3 className="text-2xl md:text-3xl font-black tracking-tight">{s.title}</h3>
                     </div>
