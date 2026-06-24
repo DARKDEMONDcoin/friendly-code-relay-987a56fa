@@ -225,6 +225,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
+    // 0. Backfill missing translations from prior days (safety net so no post
+    //    is ever stuck with fewer than 25 languages).
+    const bf = await backfillTranslations().catch((e) => { console.warn("backfill error", e); return { checked: 0, filled: 0 }; });
+
+
     // 1. Pick queued telegram/manual topics first
     const { data: queued } = await supabase
       .from("blog_topic_queue")
