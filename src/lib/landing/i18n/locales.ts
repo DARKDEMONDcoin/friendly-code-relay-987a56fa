@@ -13,7 +13,17 @@ export type LocaleCode =
   | "ko"
   | "hi"
   | "id"
-  | "nl";
+  | "nl"
+  | "sv"
+  | "cs"
+  | "ro"
+  | "el"
+  | "uk"
+  | "he"
+  | "fa"
+  | "vi"
+  | "th"
+  | "pl";
 
 export interface LocaleMeta {
   code: LocaleCode;
