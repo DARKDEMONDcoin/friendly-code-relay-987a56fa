@@ -257,7 +257,7 @@ async function setMyCommands() {
     { command: "keys",       description: "🔑 مزوّدو API" },
     { command: "listkeys",   description: "🔑 عرض المفاتيح (ali|ws|manus)" },
     { command: "run",        description: "▶️ تشغيل وكيل" },
-    { command: "blog",       description: "✍️ /blog new — مقال جديد" },
+    { command: "blog",       description: "✍️ /blog new [العنوان اختياري]" },
     { command: "add",        description: "➕ إضافة مهمة" },
     { command: "edit",       description: "✏️ تعديل مهمة" },
     { command: "toggle",     description: "🟢 تفعيل/تعطيل مهمة" },
