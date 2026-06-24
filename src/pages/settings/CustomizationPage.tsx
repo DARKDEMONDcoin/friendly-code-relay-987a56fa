@@ -127,53 +127,6 @@ const CustomizationPage = () => {
         subtitle="Pick a theme and an accent color that fits your vibe."
       />
 
-      <CartoonCard className="space-y-4">
-        <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: MUTED, fontWeight: 800 }}>
-          Appearance
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {themes.map((t) => {
-            const isSelected = currentTheme === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleThemeChange(t.id)}
-                className="relative rounded-2xl p-3 text-left transition active:translate-x-[1px] active:translate-y-[1px]"
-                style={{
-                  backgroundColor: SURFACE_2,
-                  border: `2px solid ${isSelected ? TEXT : "hsl(var(--surface-4))"}`,
-                  boxShadow: isSelected ? `3px 3px 0 ${TEXT}` : "none",
-                }}
-              >
-                <div
-                  className="w-full aspect-[4/3] rounded-xl overflow-hidden mb-3 border"
-                  style={{ background: t.bg, borderColor: t.muted }}
-                >
-                  <div className="p-3 space-y-2">
-                    <div className="h-1.5 w-1/3 rounded-full" style={{ background: t.fg, opacity: 0.85 }} />
-                    <div className="h-1 w-full rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="h-1 w-3/4 rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="h-1 w-1/2 rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="mt-3 flex justify-end">
-                      <div className="h-2 w-10 rounded-full" style={{ background: `hsl(${currentAccent})` }} />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-[13px]" style={{ color: TEXT, fontWeight: 800 }}>{t.label}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: MUTED, fontWeight: 600 }}>{t.desc}</p>
-                {isSelected && (
-                  <div
-                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full grid place-items-center"
-                    style={{ background: YELLOW, border: `2px solid ${INK}` }}
-                  >
-                    <Check className="w-3.5 h-3.5" style={{ color: INK }} strokeWidth={3} />
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </CartoonCard>
 
       <CartoonCard className="space-y-4">
         <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: MUTED, fontWeight: 800 }}>
