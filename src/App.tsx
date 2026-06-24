@@ -577,12 +577,31 @@ const App = () => {
                       <Route path="/home" element={<LandingPage />} />
                       <Route path="/se" element={<SePage />} />
                       <Route path="/l/*" element={<ServiceLandingPage />} />
-                      {/* Locale-prefixed landing aliases (e.g. /pt/criar-apps-ia → /l/pt/criar-apps-ia) */}
+                      {/* Locale-prefixed landing aliases (25 langs → ServiceLandingPage handles locale + slug) */}
                       <Route path="/ar/*" element={<ServiceLandingPage />} />
                       <Route path="/es/*" element={<ServiceLandingPage />} />
                       <Route path="/fr/*" element={<ServiceLandingPage />} />
                       <Route path="/de/*" element={<ServiceLandingPage />} />
                       <Route path="/pt/*" element={<ServiceLandingPage />} />
+                      <Route path="/it/*" element={<ServiceLandingPage />} />
+                      <Route path="/tr/*" element={<ServiceLandingPage />} />
+                      <Route path="/ru/*" element={<ServiceLandingPage />} />
+                      <Route path="/zh/*" element={<ServiceLandingPage />} />
+                      <Route path="/ja/*" element={<ServiceLandingPage />} />
+                      <Route path="/ko/*" element={<ServiceLandingPage />} />
+                      <Route path="/hi/*" element={<ServiceLandingPage />} />
+                      <Route path="/id/*" element={<ServiceLandingPage />} />
+                      <Route path="/nl/*" element={<ServiceLandingPage />} />
+                      <Route path="/sv/*" element={<ServiceLandingPage />} />
+                      <Route path="/cs/*" element={<ServiceLandingPage />} />
+                      <Route path="/ro/*" element={<ServiceLandingPage />} />
+                      <Route path="/el/*" element={<ServiceLandingPage />} />
+                      <Route path="/uk/*" element={<ServiceLandingPage />} />
+                      <Route path="/he/*" element={<ServiceLandingPage />} />
+                      <Route path="/fa/*" element={<ServiceLandingPage />} />
+                      <Route path="/vi/*" element={<ServiceLandingPage />} />
+                      <Route path="/th/*" element={<ServiceLandingPage />} />
+                      <Route path="/pl/*" element={<ServiceLandingPage />} />
                       <Route path="/ref/:code" element={<ReferralRedirectPage />} />
                       <Route path="/r/:code" element={<ReferralLandingPage />} />
 
