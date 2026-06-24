@@ -8,7 +8,7 @@
 // Returns:    { ok, post_id, translation_group_id, slug }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { getLLM } from "../_shared/llm-router.ts";
+import { getLLM, getLovableGateway, lovableEquivalent } from "../_shared/llm-router.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -100,34 +100,39 @@ async function callLLM(topic: string, angle?: string): Promise<GenResult> {
   const llm = await getLLM();
   if (!llm) throw new Error("no LLM provider available");
 
-  const body = {
-    // Force Qwen-Max (highest Alibaba model) for SEO-grade English originals.
-    model: llm.mapModel("qwen-max"),
-    messages: [
-      { role: "system", content: SYSTEM },
-      { role: "user", content: USER_TEMPLATE(topic, angle) },
-    ],
-    temperature: 0.7,
-    response_format: { type: "json_object" },
-  };
+  const messages = [
+    { role: "system", content: SYSTEM },
+    { role: "user", content: USER_TEMPLATE(topic, angle) },
+  ];
 
-  const res = await fetch(llm.url, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${llm.key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  const doCall = async (endpoint: { url: string; key: string }, model: string) =>
+    await fetch(endpoint.url, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${endpoint.key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model, messages, temperature: 0.7, response_format: { type: "json_object" } }),
+    });
 
+  // Primary: Qwen-Max (Alibaba flagship) for SEO-grade English originals.
+  let res = await doCall(llm, llm.mapModel("qwen-max"));
+
+  // Fallback: Lovable Gateway (Gemini Pro) when Qwen is out of quota.
   if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`LLM failed ${res.status}: ${txt.slice(0, 400)}`);
+    const errText = await res.text();
+    console.warn(`blog-generate primary failed ${res.status}: ${errText.slice(0, 200)} — trying Lovable Gateway`);
+    const lov = getLovableGateway();
+    if (!lov) throw new Error(`LLM failed ${res.status}: ${errText.slice(0, 400)}`);
+    res = await doCall(lov, lovableEquivalent("qwen-max"));
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`LLM fallback failed ${res.status}: ${t.slice(0, 400)}`);
+    }
   }
+
   const data = await res.json();
   const text: string = data?.choices?.[0]?.message?.content ?? "";
   const cleaned = text.replace(/^```json\s*|\s*```$/g, "").trim();
   const parsed = JSON.parse(cleaned) as GenResult;
+
 
   // Defensive defaults
   parsed.keywords = Array.isArray(parsed.keywords) ? parsed.keywords.slice(0, 12) : [];

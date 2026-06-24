@@ -5,7 +5,7 @@
 // standalone with { post_id, target_langs?: string[] }.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { getLLM } from "../_shared/llm-router.ts";
+import { getLLM, getLovableGateway, lovableEquivalent } from "../_shared/llm-router.ts";
 import { BLOG_LANGS, BLOG_LANG_CODES, getLang } from "../_shared/blog-langs.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -80,30 +80,52 @@ FAQ:
 ${JSON.stringify(post.faq || [])}
 `;
 
+async function callTranslator(
+  endpoint: { url: string; key: string },
+  model: string,
+  systemMsg: string,
+  userMsg: string,
+): Promise<Response> {
+  return await fetch(endpoint.url, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${endpoint.key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemMsg },
+        { role: "user", content: userMsg },
+      ],
+      temperature: 0.4,
+      response_format: { type: "json_object" },
+    }),
+  });
+}
+
 async function translateOne(post: any, langCode: string): Promise<any> {
   const lang = getLang(langCode);
   if (!lang) throw new Error(`unknown lang ${langCode}`);
   const llm = await getLLM();
   if (!llm) throw new Error("no LLM provider available");
 
-  const res = await fetch(llm.url, {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${llm.key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      // Qwen-Plus is Alibaba's highest multilingual translation model (vs qwen-max for original writing).
-      model: llm.mapModel("qwen-plus"),
-      messages: [
-        { role: "system", content: SYSTEM(lang.name) },
-        { role: "user", content: USER(post, lang.name, langCode) },
-      ],
-      temperature: 0.4,
-      response_format: { type: "json_object" },
-    }),
-  });
+  const systemMsg = SYSTEM(lang.name);
+  const userMsg = USER(post, lang.name, langCode);
+
+  // Primary: Qwen-Plus via the resolved provider (usually DashScope)
+  let res = await callTranslator(llm, llm.mapModel("qwen-plus"), systemMsg, userMsg);
+
+  // Fallback: Lovable Gateway (Gemini) when Qwen is out of quota / 4xx / 5xx.
   if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`translate ${langCode} failed ${res.status}: ${t.slice(0, 300)}`);
+    const errText = await res.text();
+    console.warn(`translate ${langCode} primary failed ${res.status}: ${errText.slice(0, 200)} — trying Lovable Gateway`);
+    const lov = getLovableGateway();
+    if (!lov) throw new Error(`translate ${langCode} failed ${res.status}: ${errText.slice(0, 300)}`);
+    res = await callTranslator(lov, lovableEquivalent("qwen-plus"), systemMsg, userMsg);
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`translate ${langCode} fallback failed ${res.status}: ${t.slice(0, 300)}`);
+    }
   }
+
   const data = await res.json();
   const text: string = data?.choices?.[0]?.message?.content ?? "";
   const cleaned = text.replace(/^```json\s*|\s*```$/g, "").trim();
