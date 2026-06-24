@@ -37,6 +37,7 @@ const BlogPostPage = () => {
   const staticPost = lang === "en" ? getBlogPost(slug) : undefined;
   const [dbPost, setDbPost] = useState<DbPost | null>(null);
   const [siblings, setSiblings] = useState<Sibling[]>([]);
+  const [dbRelated, setDbRelated] = useState<Array<{ slug: string; title: string; meta_description: string | null; category: string | null }>>([]);
   const [loading, setLoading] = useState(!staticPost);
 
   useEffect(() => {
@@ -62,6 +63,17 @@ const BlogPostPage = () => {
           .eq("status", "published");
         if (!cancelled) setSiblings((sibs as Sibling[]) ?? []);
       }
+
+      // Same-language related posts (E-E-A-T + internal linking)
+      const { data: rel } = await supabase
+        .from("blog_posts")
+        .select("slug,title,meta_description,category,published_at")
+        .eq("language", lang)
+        .eq("status", "published")
+        .neq("slug", slug)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      if (!cancelled) setDbRelated((rel as any) ?? []);
     })();
     return () => { cancelled = true; };
   }, [slug, lang, staticPost]);
@@ -89,7 +101,23 @@ const BlogPostPage = () => {
   } as any;
 
   const faq = dbPost?.faq ?? null;
-  const related = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
+  // Related posts: prefer DB same-language posts; fallback to static EN list.
+  const related = dbRelated.length > 0
+    ? dbRelated.map((r) => ({
+        slug: r.slug,
+        title: r.title,
+        description: r.meta_description || "",
+        category: r.category || "AI Guides",
+        href: blogPath(r.slug, lang),
+      }))
+    : BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3).map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        category: p.category,
+        href: `/blog/${p.slug}`,
+      }));
+
 
   // Strip $$md$$ delimiters if present (DB posts wrap content).
   const cleanBody = String(post.body).replace(/\$\$md\$\$/g, "").trim();
