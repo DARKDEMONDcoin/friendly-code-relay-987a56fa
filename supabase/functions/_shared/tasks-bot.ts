@@ -258,6 +258,8 @@ async function setMyCommands() {
     { command: "listkeys",   description: "🔑 عرض المفاتيح (ali|ws|manus)" },
     { command: "run",        description: "▶️ تشغيل وكيل" },
     { command: "blog",       description: "✍️ /blog new [العنوان اختياري]" },
+    { command: "topic",      description: "🌍 /topic <نص> — يضيف موضوع لقائمة النشر التلقائي (25 لغة)" },
+    { command: "publishnow", description: "🚀 ينشر دفعة اليوم فوراً (EN + 24 ترجمة)" },
     { command: "add",        description: "➕ إضافة مهمة" },
     { command: "edit",       description: "✏️ تعديل مهمة" },
     { command: "toggle",     description: "🟢 تفعيل/تعطيل مهمة" },
