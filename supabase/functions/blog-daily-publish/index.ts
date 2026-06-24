@@ -153,10 +153,17 @@ Deno.serve(async (req) => {
         if (!gen?.post_id) { results.push({ topic: t.topic, ok: false, step: "generate", error: gen?.error || "unknown" }); continue; }
         newUrls.push(`${SITE_URL}/blog/${gen.slug}`);
 
-        // Translate (fire-and-await — sequential per post to limit cost burst)
-        const tr = await callEdge("blog-translate", { post_id: gen.post_id });
-        const okLangs = (tr?.results || []).filter((r: any) => r.ok).map((r: any) => r.lang);
-        results.push({ topic: t.topic, ok: true, post_id: gen.post_id, slug: gen.slug, translated: okLangs.length });
+        // Translate in chunks of 8 langs per invocation to stay within worker
+        // resource limits; loop until no more pending langs (or 5 max passes).
+        let translatedTotal = 0;
+        for (let pass = 0; pass < 5; pass++) {
+          const tr = await callEdge("blog-translate", { post_id: gen.post_id, max_langs: 8 });
+          const okLangs = (tr?.results || []).filter((r: any) => r.ok).map((r: any) => r.lang);
+          translatedTotal += okLangs.length;
+          if (!tr?.results || tr.results.length === 0) break;
+        }
+        results.push({ topic: t.topic, ok: true, post_id: gen.post_id, slug: gen.slug, translated: translatedTotal });
+
 
         // Mark queue row done if it was a queued topic
         if (t.id) {

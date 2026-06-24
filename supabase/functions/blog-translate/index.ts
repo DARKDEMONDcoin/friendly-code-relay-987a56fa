@@ -101,6 +101,27 @@ async function callTranslator(
   });
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function callWithRetry(
+  endpoint: { url: string; key: string },
+  model: string,
+  systemMsg: string,
+  userMsg: string,
+  label: string,
+): Promise<Response> {
+  let res = await callTranslator(endpoint, model, systemMsg, userMsg);
+  let attempt = 0;
+  while ((res.status === 429 || res.status === 503) && attempt < 3) {
+    const wait = 5000 * Math.pow(2, attempt); // 5s, 10s, 20s
+    console.warn(`${label} ${res.status} — backing off ${wait}ms (attempt ${attempt + 1})`);
+    await sleep(wait);
+    res = await callTranslator(endpoint, model, systemMsg, userMsg);
+    attempt++;
+  }
+  return res;
+}
+
 async function translateOne(post: any, langCode: string): Promise<any> {
   const lang = getLang(langCode);
   if (!lang) throw new Error(`unknown lang ${langCode}`);
@@ -111,7 +132,7 @@ async function translateOne(post: any, langCode: string): Promise<any> {
   const userMsg = USER(post, lang.name, langCode);
 
   // Primary: Qwen-Plus via the resolved provider (usually DashScope)
-  let res = await callTranslator(llm, llm.mapModel("qwen-plus"), systemMsg, userMsg);
+  let res = await callWithRetry(llm, llm.mapModel("qwen-plus"), systemMsg, userMsg, `translate ${langCode} primary`);
 
   // Fallback: Lovable Gateway (Gemini) when Qwen is out of quota / 4xx / 5xx.
   if (!res.ok) {
@@ -119,7 +140,7 @@ async function translateOne(post: any, langCode: string): Promise<any> {
     console.warn(`translate ${langCode} primary failed ${res.status}: ${errText.slice(0, 200)} — trying Lovable Gateway`);
     const lov = getLovableGateway();
     if (!lov) throw new Error(`translate ${langCode} failed ${res.status}: ${errText.slice(0, 300)}`);
-    res = await callTranslator(lov, lovableEquivalent("qwen-plus"), systemMsg, userMsg);
+    res = await callWithRetry(lov, lovableEquivalent("qwen-plus"), systemMsg, userMsg, `translate ${langCode} fallback`);
     if (!res.ok) {
       const t = await res.text();
       throw new Error(`translate ${langCode} fallback failed ${res.status}: ${t.slice(0, 300)}`);
@@ -137,7 +158,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("method not allowed", { status: 405, headers: cors });
 
   try {
-    const { post_id, target_langs } = await req.json();
+    const { post_id, target_langs, max_langs } = await req.json();
     if (!post_id) return new Response(JSON.stringify({ error: "post_id required" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
 
     const { data: source, error: srcErr } = await supabase
@@ -159,8 +180,13 @@ Deno.serve(async (req) => {
       .eq("translation_group_id", groupId);
     const have = new Set((existing || []).map((r: any) => r.language));
 
+    // Cap per invocation to avoid worker resource limits (24 sequential translations
+    // exceed the function's CPU budget). Daily-publish calls us in batches.
+    const cap = Math.max(1, Math.min(Number(max_langs) || 8, 24));
     const targets = (target_langs && Array.isArray(target_langs) ? target_langs : BLOG_LANG_CODES)
-      .filter((c: string) => c !== source.language && !have.has(c));
+      .filter((c: string) => c !== source.language && !have.has(c))
+      .slice(0, cap);
+
 
     // Strip $$md$$ wrappers from source content_md if present, so the model
     // sees clean markdown.
