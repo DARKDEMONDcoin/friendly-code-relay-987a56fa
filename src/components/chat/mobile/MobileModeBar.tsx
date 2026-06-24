@@ -98,13 +98,13 @@ export default function MobileModeBar({ mode, onChange }: Props) {
               }}
               className="inline-flex items-center justify-center w-7 h-7 rounded-full transition-transform active:scale-90"
               style={{
-                backgroundColor: "#ffffff",
-                color: "hsl(var(--brand-ink))",
-                border: "2px solid hsl(var(--brand-ink))",
-                boxShadow: "1.5px 1.5px 0 hsl(var(--brand-ink))",
+                backgroundColor: "hsl(var(--surface-1))",
+                color: "hsl(var(--brand-parchment))",
+                border: `2px solid ${tint("hsl(var(--brand-ink))", 0.55)}`,
+                boxShadow: `1.5px 1.5px 0 ${tint("hsl(var(--brand-ink))", 0.25)}`,
               }}
             >
-              <X size={14} strokeWidth={3.2} />
+              <X size={14} strokeWidth={3} />
             </button>
           </motion.div>
         ) : (
