@@ -299,7 +299,7 @@ Deno.serve(async (req) => {
     // 3. Notify search engines
     await Promise.all([pingGoogleSitemap(), pingIndexNow(newUrls)]);
 
-    return new Response(JSON.stringify({ ok: true, picked: topics.length, results }), {
+    return new Response(JSON.stringify({ ok: true, picked: topics.length, backfill: bf, results }), {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (e) {
