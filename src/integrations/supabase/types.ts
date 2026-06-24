@@ -1133,8 +1133,10 @@ export type Database = {
           content_md: string
           created_at: string
           excerpt: string | null
+          faq: Json | null
           hero_image_url: string | null
           id: string
+          is_original: boolean
           jsonld: Json | null
           keywords: string[] | null
           language: string
@@ -1145,6 +1147,7 @@ export type Database = {
           status: string
           tags: string[] | null
           title: string
+          translation_group_id: string | null
           updated_at: string
           views: number
         }
@@ -1156,8 +1159,10 @@ export type Database = {
           content_md: string
           created_at?: string
           excerpt?: string | null
+          faq?: Json | null
           hero_image_url?: string | null
           id?: string
+          is_original?: boolean
           jsonld?: Json | null
           keywords?: string[] | null
           language?: string
@@ -1168,6 +1173,7 @@ export type Database = {
           status?: string
           tags?: string[] | null
           title: string
+          translation_group_id?: string | null
           updated_at?: string
           views?: number
         }
@@ -1179,8 +1185,10 @@ export type Database = {
           content_md?: string
           created_at?: string
           excerpt?: string | null
+          faq?: Json | null
           hero_image_url?: string | null
           id?: string
+          is_original?: boolean
           jsonld?: Json | null
           keywords?: string[] | null
           language?: string
@@ -1191,6 +1199,7 @@ export type Database = {
           status?: string
           tags?: string[] | null
           title?: string
+          translation_group_id?: string | null
           updated_at?: string
           views?: number
         }
@@ -1200,6 +1209,62 @@ export type Database = {
             columns: ["ai_agent_id"]
             isOneToOne: false
             referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_topic_queue: {
+        Row: {
+          angle: string | null
+          created_at: string
+          done_at: string | null
+          error: string | null
+          id: string
+          language: string
+          picked_at: string | null
+          priority: number
+          requested_by: string | null
+          result_post_id: string | null
+          source: string
+          status: string
+          topic: string
+        }
+        Insert: {
+          angle?: string | null
+          created_at?: string
+          done_at?: string | null
+          error?: string | null
+          id?: string
+          language?: string
+          picked_at?: string | null
+          priority?: number
+          requested_by?: string | null
+          result_post_id?: string | null
+          source?: string
+          status?: string
+          topic: string
+        }
+        Update: {
+          angle?: string | null
+          created_at?: string
+          done_at?: string | null
+          error?: string | null
+          id?: string
+          language?: string
+          picked_at?: string | null
+          priority?: number
+          requested_by?: string | null
+          result_post_id?: string | null
+          source?: string
+          status?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_topic_queue_result_post_id_fkey"
+            columns: ["result_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
             referencedColumns: ["id"]
           },
         ]
