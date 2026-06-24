@@ -491,39 +491,56 @@ function slugify(s: string): string {
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
-async function runBlogWriter(agentId: string): Promise<{ summary: string; postId?: string }> {
-  // Pick a fresh topic — either user-supplied via env queue, or AI-chosen
-  const topicPrompt = `Choose ONE specific SEO-friendly blog topic for an AI tools platform (image generation, video AI, prompt engineering). Return JSON: {"topic":"...","keywords":["k1","k2","k3"]}`;
-  const topicRes = await kimiJson<any>({
-    messages: [{ role: "user", content: topicPrompt }],
-    temperature: 0.9, max_tokens: 200,
-  });
-  const topic = String(topicRes?.topic || "AI image generation guide");
-  const keywords = Array.isArray(topicRes?.keywords) ? topicRes.keywords.slice(0, 8) : [];
+async function runBlogWriter(agentId: string, customTitle?: string): Promise<{ summary: string; postId?: string }> {
+  let topic: string;
+  let keywords: string[] = [];
 
-  const writePrompt = `Write a comprehensive 1500-2500 word SEO blog post about: "${topic}".
+  if (customTitle && customTitle.trim().length > 0) {
+    // Operator-supplied title — derive keywords from it, skip topic discovery.
+    topic = customTitle.trim().slice(0, 200);
+    try {
+      const kwRes = await kimiJson<any>({
+        messages: [{ role: "user", content: `Return JSON {"keywords":["k1",...8]} with 5-8 SEO keywords for an article titled "${topic}". JSON only.` }],
+        temperature: 0.4, max_tokens: 200,
+      });
+      keywords = Array.isArray(kwRes?.keywords) ? kwRes.keywords.slice(0, 8) : [];
+    } catch { /* keywords optional */ }
+  } else {
+    // AI-chosen topic
+    const topicPrompt = `Choose ONE specific SEO-friendly blog topic for an AI tools platform (image generation, video AI, prompt engineering, AI workflows for creators). The topic must target high-intent Google search queries with commercial or informational value. Return JSON: {"topic":"...","keywords":["k1","k2","k3"]}`;
+    const topicRes = await kimiJson<any>({
+      messages: [{ role: "user", content: topicPrompt }],
+      temperature: 0.95, max_tokens: 250,
+    });
+    topic = String(topicRes?.topic || "AI image generation guide");
+    keywords = Array.isArray(topicRes?.keywords) ? topicRes.keywords.slice(0, 8) : [];
+  }
 
-Required structure:
-# Title (catchy, contains main keyword)
+  const writePrompt = `Write an in-depth, definitive 2200-3000 word SEO blog post about: "${topic}".
 
-(1-2 paragraph engaging intro)
+Strict structure (Markdown only, no code fences):
+# Title (catchy, contains main keyword, under 65 chars)
 
-## H2 sections (4-7 of them) with detailed content under each
-## Include bullet lists where useful
-## Include a comparison or example
-## Practical tips section
-## FAQ section (3-5 Q&A)
-## Conclusion with CTA
+(2 paragraph engaging intro that hooks the reader and previews value)
 
-Keywords to weave naturally: ${keywords.join(", ")}.
-Tone: expert, practical, no fluff. Markdown only. Do NOT wrap in code fences.`;
+## 5-8 H2 sections with rich detail, examples, and specifics
+- Use bullet lists, numbered steps, and short paragraphs
+- Include at least one comparison table (Markdown table syntax)
+- Include a "Practical workflow" or "Step-by-step" section
+- Include a "Common mistakes" section
+- Include an "FAQ" H2 with 5-7 Question/Answer pairs as ### Q + paragraph A
+
+## Conclusion with a soft CTA to try Megsy AI (megsyai.com).
+
+Keywords to weave naturally (do NOT stuff): ${keywords.join(", ")}.
+Tone: senior expert, practical, opinionated, zero fluff. Aim for E-E-A-T signals (experience, examples, concrete numbers). No filler phrases like "in today's fast-paced world".`;
 
   const contentMd = await kimiChat({
     messages: [
-      { role: "system", content: "You are a senior SEO content writer producing E-E-A-T compliant articles." },
+      { role: "system", content: "You are a senior SEO content writer producing E-E-A-T compliant long-form articles that rank #1 on Google. You write with authority, cite concrete examples, and never produce filler." },
       { role: "user", content: writePrompt },
     ],
-    temperature: 0.7, max_tokens: 4000,
+    temperature: 0.75, max_tokens: 6000,
   });
 
   // Extract title from first # line
@@ -532,6 +549,7 @@ Tone: expert, practical, no fluff. Markdown only. Do NOT wrap in code fences.`;
   const slug = `${slugify(title)}-${Date.now().toString(36)}`;
   const wordCount = contentMd.split(/\s+/).length;
   const readingMinutes = Math.max(2, Math.round(wordCount / 220));
+
 
   // Generate meta description
   const metaRes = await kimiChat({
