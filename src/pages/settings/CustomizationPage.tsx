@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -6,25 +6,6 @@ import { DesktopSettingsLayout } from "@/components/settings/DesktopSettingsLayo
 import { CartoonPage, CartoonHero, CartoonCard } from "@/components/settings/CartoonSettingsShell";
 import { INK, YELLOW, PINK, MINT, LAVENDER, PEACH, TEXT, MUTED, SURFACE_2 } from "@/pages/billing/ReferralsPage";
 import customizationSticker from "@/assets/settings/customization-sticker.png";
-
-const themes = [
-  {
-    id: "light",
-    label: "Pure White",
-    desc: "Bright & clean",
-    bg: "#ffffff",
-    fg: "#0a0a0a",
-    muted: "#f4f4f5",
-  },
-  {
-    id: "dark",
-    label: "Pitch Black",
-    desc: "Deep & focused",
-    bg: "#000000",
-    fg: "#fafafa",
-    muted: "#141414",
-  },
-];
 
 const accentColors = [
   { hsl: "262 60% 55%", hex: "#7c5cfc" },
@@ -39,26 +20,30 @@ const accentColors = [
   { hsl: "45 90% 50%", hex: "#eab308" },
   { hsl: "150 60% 40%", hex: "#10b981" },
   { hsl: "340 80% 55%", hex: "#f43f5e" },
+  // Creative additions — premium hues
+  { hsl: "230 70% 60%", hex: "#5b6cf5" },
+  { hsl: "290 65% 60%", hex: "#c855f0" },
+  { hsl: "12 85% 58%", hex: "#f56042" },
+  { hsl: "195 85% 50%", hex: "#0ea5e9" },
+  { hsl: "85 60% 45%", hex: "#84cc16" },
+  { hsl: "320 75% 60%", hex: "#e84cc4" },
 ];
 
 const CustomizationPage = () => {
   const isMobile = useIsMobile();
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    const t = localStorage.getItem("theme");
-    return t === "light" ? "light" : "dark";
-  });
   const [currentAccent, setCurrentAccent] = useState(
     () => localStorage.getItem("accent") || "262 60% 55%",
   );
 
-  const handleThemeChange = useCallback((id: string) => {
-    document.documentElement.setAttribute("data-theme", id);
-    const isDark = id === "dark" || id === "ocean";
-    document.documentElement.classList.toggle("dark", isDark);
-    document.documentElement.style.colorScheme = isDark ? "dark" : "light";
-    localStorage.setItem("theme", id);
-    window.dispatchEvent(new Event("themechange-custom"));
-    setCurrentTheme(id);
+  // Lock the theme to the current dark experience — forever.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.classList.add("dark");
+    document.documentElement.style.colorScheme = "dark";
+    if (localStorage.getItem("theme") !== "dark") {
+      localStorage.setItem("theme", "dark");
+      window.dispatchEvent(new Event("themechange-custom"));
+    }
   }, []);
 
   const handleAccentChange = useCallback((hsl: string) => {
@@ -69,71 +54,13 @@ const CustomizationPage = () => {
     setCurrentAccent(hsl);
   }, []);
 
+
   const content = (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-12 max-w-md mx-auto"
     >
-      {/* Theme Selection — only Pure White and Pitch Black */}
-      <div>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.12em] mb-5">
-          Appearance
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {themes.map((t) => {
-            const isSelected = currentTheme === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleThemeChange(t.id)}
-                className={`relative rounded-2xl p-3 transition-all text-left ${
-                  isSelected
-                    ? "ring-2 ring-foreground"
-                    : "ring-1 ring-border/60 hover:ring-foreground/40"
-                }`}
-              >
-                <div
-                  className="w-full aspect-[4/3] rounded-xl overflow-hidden mb-3 border"
-                  style={{ background: t.bg, borderColor: t.muted }}
-                >
-                  <div className="p-3 space-y-2">
-                    <div
-                      className="h-1.5 w-1/3 rounded-full"
-                      style={{ background: t.fg, opacity: 0.85 }}
-                    />
-                    <div
-                      className="h-1 w-full rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div
-                      className="h-1 w-3/4 rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div
-                      className="h-1 w-1/2 rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <div
-                        className="h-2 w-10 rounded-full"
-                        style={{ background: `hsl(${currentAccent})` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-[13px] font-medium text-foreground">{t.label}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{t.desc}</p>
-                {isSelected && (
-                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-foreground flex items-center justify-center">
-                    <Check className="w-3 h-3 text-background" />
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Single color picker — applies to both accent and chat bubble */}
       <div>
@@ -200,53 +127,6 @@ const CustomizationPage = () => {
         subtitle="Pick a theme and an accent color that fits your vibe."
       />
 
-      <CartoonCard className="space-y-4">
-        <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: MUTED, fontWeight: 800 }}>
-          Appearance
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {themes.map((t) => {
-            const isSelected = currentTheme === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleThemeChange(t.id)}
-                className="relative rounded-2xl p-3 text-left transition active:translate-x-[1px] active:translate-y-[1px]"
-                style={{
-                  backgroundColor: SURFACE_2,
-                  border: `2px solid ${isSelected ? TEXT : "hsl(var(--surface-4))"}`,
-                  boxShadow: isSelected ? `3px 3px 0 ${TEXT}` : "none",
-                }}
-              >
-                <div
-                  className="w-full aspect-[4/3] rounded-xl overflow-hidden mb-3 border"
-                  style={{ background: t.bg, borderColor: t.muted }}
-                >
-                  <div className="p-3 space-y-2">
-                    <div className="h-1.5 w-1/3 rounded-full" style={{ background: t.fg, opacity: 0.85 }} />
-                    <div className="h-1 w-full rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="h-1 w-3/4 rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="h-1 w-1/2 rounded-full" style={{ background: t.fg, opacity: 0.25 }} />
-                    <div className="mt-3 flex justify-end">
-                      <div className="h-2 w-10 rounded-full" style={{ background: `hsl(${currentAccent})` }} />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-[13px]" style={{ color: TEXT, fontWeight: 800 }}>{t.label}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: MUTED, fontWeight: 600 }}>{t.desc}</p>
-                {isSelected && (
-                  <div
-                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full grid place-items-center"
-                    style={{ background: YELLOW, border: `2px solid ${INK}` }}
-                  >
-                    <Check className="w-3.5 h-3.5" style={{ color: INK }} strokeWidth={3} />
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </CartoonCard>
 
       <CartoonCard className="space-y-4">
         <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: MUTED, fontWeight: 800 }}>

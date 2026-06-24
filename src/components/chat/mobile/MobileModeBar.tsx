@@ -96,10 +96,15 @@ export default function MobileModeBar({ mode, onChange }: Props) {
                 haptic("soft");
                 onChange("normal");
               }}
-              className="inline-flex items-center justify-center w-6 h-6 rounded-full hover:bg-black/10 active:bg-black/20 transition-colors"
-              style={{ color: "hsl(var(--brand-ink))" }}
+              className="inline-flex items-center justify-center w-7 h-7 rounded-full transition-transform active:scale-90"
+              style={{
+                backgroundColor: "#ffffff",
+                color: "hsl(var(--brand-ink))",
+                border: "2px solid hsl(var(--brand-ink))",
+                boxShadow: "1.5px 1.5px 0 hsl(var(--brand-ink))",
+              }}
             >
-              <X size={13} strokeWidth={3} />
+              <X size={14} strokeWidth={3.2} />
             </button>
           </motion.div>
         ) : (
