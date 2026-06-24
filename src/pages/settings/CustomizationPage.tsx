@@ -61,65 +61,6 @@ const CustomizationPage = () => {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-12 max-w-md mx-auto"
     >
-      {/* Theme Selection — only Pure White and Pitch Black */}
-      <div>
-        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.12em] mb-5">
-          Appearance
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {themes.map((t) => {
-            const isSelected = currentTheme === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => handleThemeChange(t.id)}
-                className={`relative rounded-2xl p-3 transition-all text-left ${
-                  isSelected
-                    ? "ring-2 ring-foreground"
-                    : "ring-1 ring-border/60 hover:ring-foreground/40"
-                }`}
-              >
-                <div
-                  className="w-full aspect-[4/3] rounded-xl overflow-hidden mb-3 border"
-                  style={{ background: t.bg, borderColor: t.muted }}
-                >
-                  <div className="p-3 space-y-2">
-                    <div
-                      className="h-1.5 w-1/3 rounded-full"
-                      style={{ background: t.fg, opacity: 0.85 }}
-                    />
-                    <div
-                      className="h-1 w-full rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div
-                      className="h-1 w-3/4 rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div
-                      className="h-1 w-1/2 rounded-full"
-                      style={{ background: t.fg, opacity: 0.25 }}
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <div
-                        className="h-2 w-10 rounded-full"
-                        style={{ background: `hsl(${currentAccent})` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-[13px] font-medium text-foreground">{t.label}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{t.desc}</p>
-                {isSelected && (
-                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-foreground flex items-center justify-center">
-                    <Check className="w-3 h-3 text-background" />
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Single color picker — applies to both accent and chat bubble */}
       <div>
