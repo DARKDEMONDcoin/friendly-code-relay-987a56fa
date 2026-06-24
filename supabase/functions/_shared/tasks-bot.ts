@@ -1003,10 +1003,24 @@ async function handleCommand(chatId: number, text: string) {
   }
 
   if (cmd === "/blog" && args.trim().startsWith("new")) {
-    await tgSend(chatId, "📝 Generating new blog post...");
-    const r = await runAgent("blog-writer", "telegram");
-    if (r.error) return tgSend(chatId, `❌ ${r.error}`);
-    return tgSend(chatId, `✅ Blog post published. run=${r.runId.slice(0, 8)}`);
+    if (!(await isAdmin(chatId))) return tgSend(chatId, "⛔ Not authorized.");
+    const customTitle = args.replace(/^new\s*/i, "").trim();
+    await tgSend(chatId, customTitle
+      ? `📝 Generating blog post for: "<i>${customTitle.slice(0, 120)}</i>"...`
+      : "📝 Generating fresh AI-chosen blog post...");
+    const { data: agent } = await supabase.from("ai_agents").select("id").eq("slug", "blog-writer").maybeSingle();
+    if (!agent) return tgSend(chatId, "❌ blog-writer agent not configured");
+    const { data: run } = await supabase.from("agent_runs").insert({ agent_id: agent.id, status: "running", trigger: "telegram" }).select().single();
+    try {
+      const result = await runBlogWriter(agent.id, customTitle || undefined);
+      await supabase.from("agent_runs").update({ status: "success", ended_at: new Date().toISOString(), output_summary: result.summary }).eq("id", run!.id);
+      const slug = result.postId ? (await supabase.from("blog_posts").select("slug").eq("id", result.postId).maybeSingle()).data?.slug : null;
+      const url = slug ? `\n🔗 https://megsyai.com/blog/${slug}` : "";
+      return tgSend(chatId, `✅ ${result.summary}${url}`);
+    } catch (e: any) {
+      await supabase.from("agent_runs").update({ status: "failed", ended_at: new Date().toISOString(), error: String(e?.message || e).slice(0, 500) }).eq("id", run!.id);
+      return tgSend(chatId, `❌ ${String(e?.message || e).slice(0, 300)}`);
+    }
   }
 
   return tgSend(chatId, "Unknown command. /help");
@@ -1021,20 +1035,24 @@ export async function handleTasksBotRequest(req: Request): Promise<Response> {
     // Keeps us under the function-count limit by reusing this function instead of
     // creating dedicated admin-notify / admin-stats endpoints.
     if (update && typeof update.action === "string") {
-      // Require a shared secret for every action call — these endpoints
-      // expose admin stats, revenue, and arbitrary agent runs and must NOT be
-      // reachable from the public webhook URL without authentication.
-      const expected = Deno.env.get("INTERNAL_ACTIONS_SECRET") ?? "";
-      const provided =
-        req.headers.get("x-internal-secret") ??
-        req.headers.get("X-Internal-Secret") ??
-        "";
-      if (!expected || provided !== expected) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // `cron_tick` is idempotent and safe to expose — it only runs scheduled
+      // agents whose interval has elapsed. Everything else requires the
+      // shared secret because it can expose stats/revenue or trigger arbitrary
+      // agents.
+      if (update.action !== "cron_tick") {
+        const expected = Deno.env.get("INTERNAL_ACTIONS_SECRET") ?? "";
+        const provided =
+          req.headers.get("x-internal-secret") ??
+          req.headers.get("X-Internal-Secret") ??
+          "";
+        if (!expected || provided !== expected) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
+
       const action = update.action as string;
 
       const broadcast = async (text: string) => {
