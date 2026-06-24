@@ -1,6 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://megsyai.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://megsyai.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://megsyai.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://megsyai.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://megsyai.com/ar" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://megsyai.com/es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://megsyai.com/fr" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://megsyai.com/de" />
+    <xhtml:link rel="alternate" hreflang="pt" href="https://megsyai.com/pt" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://megsyai.com/it" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://megsyai.com/tr" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://megsyai.com/ru" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://megsyai.com/zh" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://megsyai.com/ja" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://megsyai.com/ko" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://megsyai.com/hi" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://megsyai.com/id" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://megsyai.com/nl" />
+    <xhtml:link rel="alternate" hreflang="sv" href="https://megsyai.com/sv" />
+    <xhtml:link rel="alternate" hreflang="cs" href="https://megsyai.com/cs" />
+    <xhtml:link rel="alternate" hreflang="ro" href="https://megsyai.com/ro" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://megsyai.com/el" />
+    <xhtml:link rel="alternate" hreflang="uk" href="https://megsyai.com/uk" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://megsyai.com/he" />
+    <xhtml:link rel="alternate" hreflang="fa" href="https://megsyai.com/fa" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://megsyai.com/vi" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://megsyai.com/th" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://megsyai.com/pl" />
+  </url>
+  <url><loc>https://megsyai.com/ar</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/es</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/fr</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/de</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/pt</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/it</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/tr</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/ru</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/zh</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/ja</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/ko</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/hi</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/id</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/nl</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/sv</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/cs</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/ro</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/el</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/uk</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/he</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/fa</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/vi</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/th</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://megsyai.com/pl</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://megsyai.com/pricing</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://megsyai.com/contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://megsyai.com/support</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
