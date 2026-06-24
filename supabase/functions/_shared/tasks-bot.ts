@@ -1023,6 +1023,44 @@ async function handleCommand(chatId: number, text: string) {
     }
   }
 
+  // Enqueue a topic for the daily multilingual publisher.
+  // Usage: /topic <topic text> | <optional angle>
+  if (cmd === "/topic") {
+    if (!(await isAdmin(chatId))) return tgSend(chatId, "⛔ Not authorized.");
+    const raw = args.trim();
+    if (!raw) return tgSend(chatId, "Usage: /topic <topic> [| angle]");
+    const [topic, angle] = raw.split("|").map((s) => s.trim());
+    const { error } = await supabase.from("blog_topic_queue").insert({
+      topic, angle: angle || null, source: "telegram", requested_by: String(chatId), priority: 5,
+    });
+    if (error) return tgSend(chatId, `❌ ${error.message}`);
+    return tgSend(chatId, `✅ Queued: <i>${topic.slice(0, 160)}</i>\nNext daily run will publish it in EN + 24 languages.`);
+  }
+
+  // Manually trigger the multilingual daily publisher (uses queue + AI fallback topics).
+  if (cmd === "/publishnow") {
+    if (!(await isAdmin(chatId))) return tgSend(chatId, "⛔ Not authorized.");
+    await tgSend(chatId, "🚀 Triggering daily multilingual publisher...");
+    try {
+      const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/blog-daily-publish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": Deno.env.get("SUPABASE_ANON_KEY")!,
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")!}`,
+        },
+        body: JSON.stringify({ trigger: "telegram" }),
+      });
+      const data = await r.json();
+      const summary = (data?.results || []).map((x: any) =>
+        x.ok ? `✅ ${x.slug} (+${x.translated || 0} langs)` : `❌ ${x.topic}: ${x.error || x.step}`
+      ).join("\n");
+      return tgSend(chatId, `<b>Publisher done</b>\nPicked: ${data?.picked || 0}\n${summary || "(no results)"}`);
+    } catch (e: any) {
+      return tgSend(chatId, `❌ ${String(e?.message || e).slice(0, 300)}`);
+    }
+  }
+
   return tgSend(chatId, "Unknown command. /help");
 }
 
