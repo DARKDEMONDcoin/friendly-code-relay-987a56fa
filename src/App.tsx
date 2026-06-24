@@ -635,6 +635,10 @@ const App = () => {
                       <Route path="/about" element={<AboutPage />} />
                       <Route path="/blog" element={<BlogPage />} />
                       <Route path="/blog/:slug" element={<BlogPostPage />} />
+                      {/* Multilingual blog routes — :lang is one of the 25 BCP-47 codes in src/data/blogLangs.ts.
+                          A non-language path segment falls through to the catch-all NotFound below. */}
+                      <Route path="/:lang/blog" element={<BlogPage />} />
+                      <Route path="/:lang/blog/:slug" element={<BlogPostPage />} />
                       <Route path="/vs/:slug" element={<ComparisonPage />} />
 
                       {/* Sharing */}
