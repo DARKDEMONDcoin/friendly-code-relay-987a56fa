@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -6,25 +6,6 @@ import { DesktopSettingsLayout } from "@/components/settings/DesktopSettingsLayo
 import { CartoonPage, CartoonHero, CartoonCard } from "@/components/settings/CartoonSettingsShell";
 import { INK, YELLOW, PINK, MINT, LAVENDER, PEACH, TEXT, MUTED, SURFACE_2 } from "@/pages/billing/ReferralsPage";
 import customizationSticker from "@/assets/settings/customization-sticker.png";
-
-const themes = [
-  {
-    id: "light",
-    label: "Pure White",
-    desc: "Bright & clean",
-    bg: "#ffffff",
-    fg: "#0a0a0a",
-    muted: "#f4f4f5",
-  },
-  {
-    id: "dark",
-    label: "Pitch Black",
-    desc: "Deep & focused",
-    bg: "#000000",
-    fg: "#fafafa",
-    muted: "#141414",
-  },
-];
 
 const accentColors = [
   { hsl: "262 60% 55%", hex: "#7c5cfc" },
@@ -39,26 +20,30 @@ const accentColors = [
   { hsl: "45 90% 50%", hex: "#eab308" },
   { hsl: "150 60% 40%", hex: "#10b981" },
   { hsl: "340 80% 55%", hex: "#f43f5e" },
+  // Creative additions — premium hues
+  { hsl: "230 70% 60%", hex: "#5b6cf5" },
+  { hsl: "290 65% 60%", hex: "#c855f0" },
+  { hsl: "12 85% 58%", hex: "#f56042" },
+  { hsl: "195 85% 50%", hex: "#0ea5e9" },
+  { hsl: "85 60% 45%", hex: "#84cc16" },
+  { hsl: "320 75% 60%", hex: "#e84cc4" },
 ];
 
 const CustomizationPage = () => {
   const isMobile = useIsMobile();
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    const t = localStorage.getItem("theme");
-    return t === "light" ? "light" : "dark";
-  });
   const [currentAccent, setCurrentAccent] = useState(
     () => localStorage.getItem("accent") || "262 60% 55%",
   );
 
-  const handleThemeChange = useCallback((id: string) => {
-    document.documentElement.setAttribute("data-theme", id);
-    const isDark = id === "dark" || id === "ocean";
-    document.documentElement.classList.toggle("dark", isDark);
-    document.documentElement.style.colorScheme = isDark ? "dark" : "light";
-    localStorage.setItem("theme", id);
-    window.dispatchEvent(new Event("themechange-custom"));
-    setCurrentTheme(id);
+  // Lock the theme to the current dark experience — forever.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.classList.add("dark");
+    document.documentElement.style.colorScheme = "dark";
+    if (localStorage.getItem("theme") !== "dark") {
+      localStorage.setItem("theme", "dark");
+      window.dispatchEvent(new Event("themechange-custom"));
+    }
   }, []);
 
   const handleAccentChange = useCallback((hsl: string) => {
@@ -68,6 +53,7 @@ const CustomizationPage = () => {
     localStorage.setItem("userBubbleColor", `hsl(${hsl})`);
     setCurrentAccent(hsl);
   }, []);
+
 
   const content = (
     <motion.div
