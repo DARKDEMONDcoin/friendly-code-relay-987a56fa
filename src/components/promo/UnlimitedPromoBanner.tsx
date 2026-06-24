@@ -64,6 +64,10 @@ const UnlimitedPromoBanner = () => {
         background:
           "linear-gradient(180deg, hsl(0 0% 4%) 0%, hsl(0 0% 6%) 100%)",
         borderBottom: "1px solid hsl(0 0% 100% / 0.06)",
+        // In standalone PWA mode (iOS/Android), the status bar overlays the top
+        // of the viewport. Push the banner content below the safe-area so the
+        // headline and countdown remain fully visible on every screen size.
+        paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
       <button
