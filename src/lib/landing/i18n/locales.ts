@@ -13,7 +13,17 @@ export type LocaleCode =
   | "ko"
   | "hi"
   | "id"
-  | "nl";
+  | "nl"
+  | "sv"
+  | "cs"
+  | "ro"
+  | "el"
+  | "uk"
+  | "he"
+  | "fa"
+  | "vi"
+  | "th"
+  | "pl";
 
 export interface LocaleMeta {
   code: LocaleCode;
@@ -161,6 +171,16 @@ export const LOCALES: LocaleMeta[] = [
     hreflang: "nl",
     ogLocale: "nl_NL",
   },
+  { code: "sv", path: "/sv", nativeName: "Svenska",         englishName: "Swedish",    dir: "ltr", hreflang: "sv",    ogLocale: "sv_SE" },
+  { code: "cs", path: "/cs", nativeName: "Čeština",          englishName: "Czech",      dir: "ltr", hreflang: "cs",    ogLocale: "cs_CZ" },
+  { code: "ro", path: "/ro", nativeName: "Română",           englishName: "Romanian",   dir: "ltr", hreflang: "ro",    ogLocale: "ro_RO" },
+  { code: "el", path: "/el", nativeName: "Ελληνικά",         englishName: "Greek",      dir: "ltr", hreflang: "el",    ogLocale: "el_GR" },
+  { code: "uk", path: "/uk", nativeName: "Українська",       englishName: "Ukrainian",  dir: "ltr", hreflang: "uk",    ogLocale: "uk_UA" },
+  { code: "he", path: "/he", nativeName: "עברית",            englishName: "Hebrew",     dir: "rtl", hreflang: "he",    ogLocale: "he_IL" },
+  { code: "fa", path: "/fa", nativeName: "فارسی",            englishName: "Persian",    dir: "rtl", hreflang: "fa",    ogLocale: "fa_IR" },
+  { code: "vi", path: "/vi", nativeName: "Tiếng Việt",       englishName: "Vietnamese", dir: "ltr", hreflang: "vi",    ogLocale: "vi_VN" },
+  { code: "th", path: "/th", nativeName: "ไทย",              englishName: "Thai",       dir: "ltr", hreflang: "th",    ogLocale: "th_TH" },
+  { code: "pl", path: "/pl", nativeName: "Polski",           englishName: "Polish",     dir: "ltr", hreflang: "pl",    ogLocale: "pl_PL" },
 ];
 
 export const getLocale = (code: LocaleCode): LocaleMeta =>

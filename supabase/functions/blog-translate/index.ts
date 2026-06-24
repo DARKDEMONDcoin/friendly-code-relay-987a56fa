@@ -90,7 +90,8 @@ async function translateOne(post: any, langCode: string): Promise<any> {
     method: "POST",
     headers: { "Authorization": `Bearer ${llm.key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: llm.mapModel("google/gemini-2.5-flash"),
+      // Qwen-Plus is Alibaba's highest multilingual translation model (vs qwen-max for original writing).
+      model: llm.mapModel("qwen-plus"),
       messages: [
         { role: "system", content: SYSTEM(lang.name) },
         { role: "user", content: USER(post, lang.name, langCode) },

@@ -17,23 +17,20 @@ import ko from "./i18n/ko";
 import hi from "./i18n/hi";
 import id from "./i18n/id";
 import nl from "./i18n/nl";
+import sv from "./i18n/sv";
+import cs from "./i18n/cs";
+import ro from "./i18n/ro";
+import el from "./i18n/el";
+import uk from "./i18n/uk";
+import he from "./i18n/he";
+import fa from "./i18n/fa";
+import vi from "./i18n/vi";
+import th from "./i18n/th";
+import pl from "./i18n/pl";
 
 const CONTENT: Record<LocaleCode, LandingContent> = {
-  en,
-  ar,
-  es,
-  fr,
-  de,
-  pt,
-  it,
-  tr,
-  ru,
-  zh,
-  ja,
-  ko,
-  hi,
-  id,
-  nl,
+  en, ar, es, fr, de, pt, it, tr, ru, zh, ja, ko, hi, id, nl,
+  sv, cs, ro, el, uk, he, fa, vi, th, pl,
 };
 
 interface Ctx {

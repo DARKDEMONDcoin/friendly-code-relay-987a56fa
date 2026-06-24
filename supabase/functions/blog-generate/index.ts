@@ -101,7 +101,8 @@ async function callLLM(topic: string, angle?: string): Promise<GenResult> {
   if (!llm) throw new Error("no LLM provider available");
 
   const body = {
-    model: llm.mapModel("google/gemini-2.5-pro"),
+    // Force Qwen-Max (highest Alibaba model) for SEO-grade English originals.
+    model: llm.mapModel("qwen-max"),
     messages: [
       { role: "system", content: SYSTEM },
       { role: "user", content: USER_TEMPLATE(topic, angle) },
